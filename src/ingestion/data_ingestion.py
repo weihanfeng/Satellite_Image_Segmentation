@@ -40,6 +40,6 @@ if __name__ == "__main__":
     URL = "https://landcover.ai.linuxpolska.com/download/landcover.ai.v1.zip"
     FILE_PATH = os.path.join(os.getcwd(), "data", "data.zip")
     EXTRACT_PATH = os.path.join(os.getcwd(), "data")
-    DATA_INGESTION = DataIngestion(URL, FILE_PATH)
+    DATA_INGESTION = DataIngestion(URL, FILE_PATH, EXTRACT_PATH)
     DATA_INGESTION.download_data()
-    DATA_INGESTION.extract_data(EXTRACT_PATH)
+    DATA_INGESTION.extract_data()
