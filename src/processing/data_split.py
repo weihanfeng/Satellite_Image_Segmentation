@@ -70,14 +70,6 @@ class DataSplit:
         # Next, get the smaller patches
         patches = self._divide_to_patch(image, mask)
 
-        # select the patches with significant variation in labels
-
-        
-
-                # if mask:
-                #     cv2.imwrite(self.dataset_dir+"256_patches/all/masks/" + file+"_patch_"+str(i)+str(j)+".tif", single_patch)
-                # else: 
-                #     cv2.imwrite(self.dataset_dir+"256_patches/all/images/" + file+"_patch_"+str(i)+str(j)+".tif", single_patch)
         return patches
 
     def _crop_image(self, image):
@@ -96,12 +88,6 @@ class DataSplit:
             patches = patchify(image, (self.patch_size, self.patch_size, 3), step=self.patch_size)  # RGB (3 dimensions) for images
 
         return patches        
-        # for i in range(patches.shape[0]):
-        #     for j in range(patches.shape[1]):
-        #         if mask:
-        #             single_patch = patches[i,j]
-        #         else:
-        #             single_patch = patches[i,j][0]
 
     def _select_patches(self, mask_patch):
         """return true if the patch has significant variation in labels"""
@@ -121,5 +107,3 @@ if __name__ == "__main__":
 
     data_split = DataSplit(patch_size, image_dir, mask_dir, dataset_dir, output_dir, selection_threshold=0.95)
     image_patches, mask_patches = data_split._split_and_select_patches()
-    print(image_patches.shape)
-    print(mask_patches.shape)
