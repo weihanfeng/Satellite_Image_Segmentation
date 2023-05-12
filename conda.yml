@@ -17,3 +17,5 @@ dependencies:
     - Pillow==9.5.0
     - patchify==0.2.3
     - split-folders==0.5.1
+    - matplotlib==3.7.1
+    - numpy==1.24.3
