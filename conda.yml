@@ -1,0 +1,19 @@
+name: sat_img_seg_env
+channels:
+  - defaults
+  - conda-forge
+dependencies:
+  - python=3.9.15
+  - pip=20.2.2
+  - ipykernel=6.4.1
+  - pip:
+    - pylint==2.9.6
+    - pytest-cov==2.10.1
+    - tqdm==4.65.0
+    - torch==2.0.1
+    - requests==2.30.0
+    - torchvision==0.15.2
+    - opencv-python==4.7.0.72
+    - Pillow==9.5.0
+    - patchify==0.2.3
+    - split-folders==0.5.1
