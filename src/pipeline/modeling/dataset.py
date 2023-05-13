@@ -4,6 +4,7 @@ from torchvision import transforms as T
 import glob
 from PIL import Image
 import matplotlib.pyplot as plt
+import numpy as np
 
 
 class SegmentationDataset(Dataset):
@@ -22,8 +23,8 @@ class SegmentationDataset(Dataset):
             image, mask = self.transform(image, mask)
 
         # convert to torch tensor
-        image = T.ToTensor()(image)
-        mask = T.ToTensor()(mask)
+        image = T.ToTensor()(np.array(image))
+        mask = torch.as_tensor(np.array(mask), dtype=torch.int64)
 
         return image, mask
 
@@ -74,13 +75,16 @@ if __name__ == "__main__":
     dataset = SegmentationDataset(image_dir, transform=Transform())
     # print dataset length
     print(len(dataset))
+    # print first mask labels
     # Dataloader and display all images and masks of the first batch in one matplotlib subplot
-    dataloader = DataLoader(dataset, batch_size=4, shuffle=True)
+    dataloader = DataLoader(dataset, batch_size=10, shuffle=True)
     # display all images and masks of the first batch in one matplotlib subplot using imshow
     count = 0
     for images, masks in dataloader:
-        while count < 4:
+        while count < 10:
             fig, ax = plt.subplots(1, 2, figsize=(10, 5))
+            # print unique labels in the mask
+            print(torch.unique(masks[count].to(torch.float32)))
             ax[0].imshow(T.ToPILImage()(images[count]))
             ax[1].imshow(T.ToPILImage()(masks[count]))
             plt.show()
