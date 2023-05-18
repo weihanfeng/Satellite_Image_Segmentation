@@ -43,6 +43,7 @@ def train_model(loader, model, loss_fn, optimizer, scaler):
         # forward
         with torch.cuda.amp.autocast(): # cast tensors to a smaller memory footprint
             predictions = model(data)
+            print(predictions[0])
             loss = loss_fn(predictions, targets)
         
         # backward
@@ -52,8 +53,10 @@ def train_model(loader, model, loss_fn, optimizer, scaler):
         scaler.update()
 
         # calculate IoU
-        # predicted_labels = torch.argmax(predictions, dim=1)
-        iou = compute_iou(predictions, targets)
+        predicted_labels = torch.argmax(predictions, dim=1)
+        # F one hot the predicted labels
+        predicted_labels = F.one_hot(predicted_labels, num_classes=5).permute(0, 3, 1, 2)
+        iou = compute_iou(predicted_labels, targets)
         total_iou += iou.item()
         total_loss += loss.item()
 
