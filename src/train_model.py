@@ -43,7 +43,6 @@ def train_model(loader, model, loss_fn, optimizer, scaler):
         # forward
         with torch.cuda.amp.autocast(): # cast tensors to a smaller memory footprint
             predictions = model(data)
-            print(predictions[0])
             loss = loss_fn(predictions, targets)
         
         # backward
