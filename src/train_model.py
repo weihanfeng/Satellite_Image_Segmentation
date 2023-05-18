@@ -34,6 +34,7 @@ def train_model(loader, model, loss_fn, optimizer, scaler):
     """
     progress_bar = tqdm(loader) # loader is an iterable
     total_loss = 0.0
+    total_iou = 0.0
     for batch_idx, (data, targets) in enumerate(progress_bar):
         data = data.to(device=DEVICE)
         targets = F.one_hot(targets, num_classes=5).permute(0, 3, 1, 2)
