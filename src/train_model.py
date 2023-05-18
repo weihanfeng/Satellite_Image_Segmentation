@@ -6,13 +6,16 @@ from pipeline.modeling.unet import UNet
 from pipeline.modeling.dataset import SegmentationDataset, Transform
 from torch.utils.data import DataLoader
 import torch.nn.functional as F
+import torch.multiprocessing
+torch.multiprocessing.set_sharing_strategy('file_system')
+
 
 # hyperparameters
 LEARNING_RATE = 1e-4
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 BATCH_SIZE = 32
 NUM_EPOCHS = 3
-NUM_WORKERS = 2
+NUM_WORKERS = 4
 IMAGE_HEIGHT = 256 
 IMAGE_WIDTH = 256
 PIN_MEMORY = False
