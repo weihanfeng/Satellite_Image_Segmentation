@@ -51,8 +51,8 @@ def train_model(loader, model, loss_fn, optimizer, scaler):
         scaler.update()
 
         # calculate IoU
-        predicted_labels = torch.argmax(predictions, dim=1)
-        iou = compute_iou(predicted_labels, targets)
+        # predicted_labels = torch.argmax(predictions, dim=1)
+        iou = compute_iou(predictions, targets)
         total_iou += iou.item()
         total_loss += loss.item()
 
