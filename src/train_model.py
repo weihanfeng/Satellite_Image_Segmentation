@@ -53,7 +53,7 @@ def train_model(loader, model, loss_fn, optimizer, scaler):
         total_loss += loss.item()
 
         # update tqdm progress bar
-        progress_bar.set_postfix({"training_loss": total_loss})
+        progress_bar.set_postfix({"training_loss": loss.item()})
         progress_bar.update()
     
     epoch_loss = total_loss/len(loader)
