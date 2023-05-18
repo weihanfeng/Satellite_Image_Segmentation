@@ -33,14 +33,10 @@ def train_model(loader, model, loss_fn, optimizer, scaler):
         None
     """
     progress_bar = tqdm(loader) # loader is an iterable
+    total_loss = 0.0
     for batch_idx, (data, targets) in enumerate(progress_bar):
         data = data.to(device=DEVICE)
-        # targets = F.one_hot(targets, num_classes=5).permute(0, 3, 1, 2)
         targets = targets.unsqueeze(1).float().to(device=DEVICE)
-        print("-----------------------------------")
-        print("data shape: ", data.shape)
-        print("target shape: ",targets.shape)
-        print("-----------------------------------")
 
         # forward
         with torch.cuda.amp.autocast(): # cast tensors to a smaller memory footprint
@@ -53,8 +49,15 @@ def train_model(loader, model, loss_fn, optimizer, scaler):
         scaler.step(optimizer)
         scaler.update()
 
+        total_loss += loss.item()
+
         # update tqdm progress bar
-        progress_bar.set_postfix({"training_loss": loss.item()})
+        progress_bar.set_postfix({"training_loss": total_loss})
+        progress_bar.update()
+    
+    epoch_loss = total_loss/len(loader)
+    print(f"Epoch loss: {epoch_loss}")
+    
 
 def main():
     # create model
