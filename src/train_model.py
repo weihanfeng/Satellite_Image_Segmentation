@@ -58,9 +58,11 @@ def train_model(train_loader, val_loader, model, loss_fn, optimizer, scaler):
         iou = compute_iou(predicted_labels, targets)
         total_iou += iou.item()
         total_loss += loss.item()
+        ongoing_iou = total_iou/(batch_idx+1)
+        ongoing_loss = total_loss/(batch_idx+1)
 
         # update tqdm progress bar
-        progress_bar.set_postfix({"loss": loss.item(), "IoU": iou.item()})
+        progress_bar.set_postfix({"loss": ongoing_loss, "IoU": ongoing_iou})
         progress_bar.update()
     
     train_loss = total_loss/len(train_loader)
