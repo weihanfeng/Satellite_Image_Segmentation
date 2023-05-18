@@ -36,7 +36,8 @@ def train_model(loader, model, loss_fn, optimizer, scaler):
     total_loss = 0.0
     for batch_idx, (data, targets) in enumerate(progress_bar):
         data = data.to(device=DEVICE)
-        targets = targets.unsqueeze(1).float().to(device=DEVICE)
+        targets = F.one_hot(targets, num_classes=5).permute(0, 3, 1, 2)
+        targets = targets.float().to(device=DEVICE)
 
         # forward
         with torch.cuda.amp.autocast(): # cast tensors to a smaller memory footprint
@@ -61,7 +62,7 @@ def train_model(loader, model, loss_fn, optimizer, scaler):
 
 def main():
     # create model
-    model = UNet(in_channels=3, out_channels=1).to(DEVICE)
+    model = UNet(in_channels=3, out_channels=5).to(DEVICE)
     # create loss function
     # non binary cross entropy loss is used for multi-class classification
     loss_fn  = nn.CrossEntropyLoss()
