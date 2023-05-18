@@ -50,15 +50,27 @@ def train_model(loader, model, loss_fn, optimizer, scaler):
         scaler.step(optimizer)
         scaler.update()
 
+        # calculate IoU
+        predicted_labels = torch.argmax(predictions, dim=1)
+        iou = compute_iou(predicted_labels, targets)
+        total_iou += iou.item()
         total_loss += loss.item()
 
         # update tqdm progress bar
-        progress_bar.set_postfix({"training_loss": loss.item()})
+        progress_bar.set_postfix({"loss": loss.item(), "IoU": iou.item()})
         progress_bar.update()
     
     epoch_loss = total_loss/len(loader)
     print(f"Epoch loss: {epoch_loss}")
+    epoch_iou = total_iou/len(loader)
+    print(f"Epoch IoU: {epoch_iou}")
     
+def compute_iou(pred, target):
+    intersection = torch.logical_and(pred, target)
+    union = torch.logical_or(pred, target)
+    iou = torch.sum(intersection) / torch.sum(union)
+
+    return iou
 
 def main():
     # create model
