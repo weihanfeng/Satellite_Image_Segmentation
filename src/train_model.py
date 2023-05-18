@@ -22,7 +22,7 @@ TRAIN_MASK_DIR = "data/selected_data_split/train/"
 VAL_IMG_DIR = "data/selected_data_split/val/"
 VAL_MASK_DIR = "data/selected_data_split/val/"
 
-def train_model(loader, model, loss_fn, optimizer, scaler):
+def train_model(train_loader, val_loader, model, loss_fn, optimizer, scaler):
     """Train model for one epoch
     Args:
         loader (DataLoader): DataLoader for training dataset
@@ -32,7 +32,7 @@ def train_model(loader, model, loss_fn, optimizer, scaler):
     Returns:
         None
     """
-    progress_bar = tqdm(loader) # loader is an iterable
+    progress_bar = tqdm(train_loader) # loader is an iterable
     total_loss = 0.0
     total_iou = 0.0
     for batch_idx, (data, targets) in enumerate(progress_bar):
@@ -63,10 +63,13 @@ def train_model(loader, model, loss_fn, optimizer, scaler):
         progress_bar.set_postfix({"loss": loss.item(), "IoU": iou.item()})
         progress_bar.update()
     
-    epoch_loss = total_loss/len(loader)
-    print(f"Epoch loss: {epoch_loss}")
-    epoch_iou = total_iou/len(loader)
-    print(f"Epoch IoU: {epoch_iou}")
+    train_loss = total_loss/len(train_loader)
+    train_iou = total_iou/len(train_loader)
+    val_loss, val_iou = validate_model(val_loader, model, loss_fn)
+    
+    print(f"Training Loss: {train_loss:.4f} | Training IoU: {train_iou:.4f}")
+    print(f"Validation Loss: {val_loss:.4f} | Validation IoU: {val_iou:.4f}")
+    print("---------------------------------------")
     
 def compute_iou(pred, target):
     intersection = torch.logical_and(pred, target)
@@ -74,6 +77,44 @@ def compute_iou(pred, target):
     iou = torch.sum(intersection) / torch.sum(union)
 
     return iou
+
+def validate_model(loader, model, loss_fn):
+    """Validate model on validation dataset
+    Args:
+        loader (DataLoader): DataLoader for validation dataset
+        model (nn.Module): model
+        loss_fn: loss function
+    Returns:
+        val_loss (float): validation loss
+        val_iou (float): validation IoU
+    """
+    model.eval()  # Set model to evaluation mode
+    val_loss = 0.0
+    total_iou = 0.0
+    total_batches = 0
+
+    with torch.no_grad():  # Disable gradient calculation
+        for batch_idx, (data, targets) in enumerate(loader):
+            data = data.to(device=DEVICE)
+            targets = F.one_hot(targets, num_classes=5).permute(0, 3, 1, 2)
+            targets = targets.float().to(device=DEVICE)
+
+            predictions = model(data)
+            loss = loss_fn(predictions, targets)
+
+            val_loss += loss.item()
+
+            predicted_labels = torch.argmax(predictions, dim=1)
+            predicted_labels = F.one_hot(predicted_labels, num_classes=5).permute(0, 3, 1, 2)
+            iou = compute_iou(predicted_labels, targets)
+            total_iou += iou.item()
+
+            total_batches += 1
+
+    val_loss /= total_batches
+    val_iou = total_iou / total_batches
+
+    return val_loss, val_iou
 
 def main():
     # create model
@@ -113,7 +154,8 @@ def main():
 
     # train model
     for epoch in range(NUM_EPOCHS):
-        train_model(train_loader, model, loss_fn, optimizer, scaler)
+        print(f"Epoch {epoch+1}/{NUM_EPOCHS}")
+        train_model(train_loader, val_loader, model, loss_fn, optimizer, scaler)
 
 if __name__ == "__main__":
     main()
