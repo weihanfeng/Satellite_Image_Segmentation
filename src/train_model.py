@@ -52,11 +52,12 @@ def main():
         shuffle=False,
     )
 
+    model = UNet(in_channels=3, out_channels=5)
     # train model
     for epoch in range(NUM_EPOCHS):
         print(f"Epoch {epoch+1}/{NUM_EPOCHS}")
         segmentation_model = ImageSegmentationModel(
-            model=UNet,
+            model=model,
             in_channels=3,
             out_channels=5,
             num_classes=5,
