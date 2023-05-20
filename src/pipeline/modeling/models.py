@@ -107,7 +107,7 @@ class ImageSegmentationModel(nn.Module):
         loss_fn=nn.CrossEntropyLoss(),
     ):
         super().__init__()
-        self.model = model.to(device=self.device)
+        self.model = model.to(self.device)
         self.learning_rate = learning_rate
         self.loss_fn = loss_fn
         self.num_classes = num_classes
