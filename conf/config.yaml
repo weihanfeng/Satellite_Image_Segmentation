@@ -1,6 +1,25 @@
 files:
+  DATA_DIR: "data"
+  FILE_NAME: "data.zip"
+  DL_IMG_DIR: "data/images/"
+  DL_MASK_DIR: "data/masks/"
+  INTERIM_DIR: "data/interim/"
+  SPLIT_DIR: "data/split/"
   TRAIN_IMG_DIR : "data/selected_data_split/train/"
   VAL_IMG_DIR : "data/selected_data_split/val/"
+
+data_ingestion:
+  FLAG: False
+  URL: "https://landcover.ai.linuxpolska.com/download/landcover.ai.v1.zip"
+
+data_split:
+  split_image:
+    PATCH_SIZE: 256
+    SELECTION_THRESHOLD: 0.95
+  train_val_split:
+    TRAIN_SIZE: 0.7
+    VAL_SIZE: 0.15
+    RANDOM_STATE: 42
 
 dataloader: 
   BATCH_SIZE: 32
