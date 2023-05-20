@@ -11,12 +11,11 @@ from tqdm import tqdm
 
 class DataSplit:
 
-    def __init__(self, patch_size, image_dir, mask_dir, dataset_dir, output_dir, selection_threshold=0.95):
+    def __init__(self, patch_size, image_dir, mask_dir, output_dir, selection_threshold=0.95):
         self.patch_size = patch_size
         self.image_dir = image_dir
         self.mask_dir = mask_dir
         self.output_dir = output_dir
-        self.dataset_dir = dataset_dir
         self.threshold = selection_threshold
 
     
@@ -24,7 +23,7 @@ class DataSplit:
         """Split and select images and corresponding mask, then save to folder"""
         # Get image names
         # have tqdm to show progress bar for loop
-        progress_bar = tqdm(total=len(os.listdir(self.image_dir)))
+        progress_bar = tqdm(total=len(os.listdir(self.image_dir)), desc="Splitting and selecting patches")
         for root, sub_dirs, files in os.walk(self.image_dir):
             for file in files: 
                 image_path = os.path.join(self.image_dir, file)
@@ -51,9 +50,6 @@ class DataSplit:
 
                 progress_bar.update(1)
         progress_bar.close()
-
-        return image_patches, mask_patches
-
 
 
     def _split_image(self, image_path, mask = False):
@@ -102,8 +98,7 @@ if __name__ == "__main__":
     patch_size = 256
     image_dir = "data/images"
     mask_dir = "data/masks"
-    dataset_dir = "data"
     output_dir = "data/selected_data"
 
-    data_split = DataSplit(patch_size, image_dir, mask_dir, dataset_dir, output_dir, selection_threshold=0.95)
-    image_patches, mask_patches = data_split._split_and_select_patches()
+    data_split = DataSplit(patch_size, image_dir, mask_dir, output_dir, selection_threshold=0.95)
+    data_split._split_and_select_patches()
