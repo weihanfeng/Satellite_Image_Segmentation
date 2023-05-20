@@ -9,7 +9,7 @@ files:
   VAL_IMG_DIR : "data/selected_data_split/val/"
 
 data_ingestion:
-  FLAG: False
+  FLAG: True
   URL: "https://landcover.ai.linuxpolska.com/download/landcover.ai.v1.zip"
 
 data_split:
