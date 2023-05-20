@@ -5,8 +5,8 @@ files:
   DL_MASK_DIR: "data/masks/"
   INTERIM_DIR: "data/interim/"
   SPLIT_DIR: "data/split/"
-  TRAIN_IMG_DIR : "data/selected_data_split/train/"
-  VAL_IMG_DIR : "data/selected_data_split/val/"
+  TRAIN_IMG_DIR : "data/split/train/"
+  VAL_IMG_DIR : "data/split/val/"
 
 data_ingestion:
   FLAG: True
