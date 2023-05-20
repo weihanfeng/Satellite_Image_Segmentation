@@ -40,7 +40,7 @@ def train_model(train_loader, val_loader, model, loss_fn, optimizer, scaler):
     total_iou = 0.0
     for batch_idx, (data, targets) in enumerate(progress_bar):
         data = data.to(device=DEVICE)
-        # targets = F.one_hot(targets, num_classes=5).permute(0, 3, 1, 2)
+        targets = F.one_hot(targets, num_classes=5).permute(0, 3, 1, 2)
         targets = targets.float().to(device=DEVICE)
 
         # forward
@@ -55,10 +55,10 @@ def train_model(train_loader, val_loader, model, loss_fn, optimizer, scaler):
         scaler.update()
 
         # calculate IoU
-        # predicted_labels = torch.argmax(predictions, dim=1)
+        predicted_labels = torch.argmax(predictions, dim=1)
         # F one hot the predicted labels
-        # predicted_labels = F.one_hot(predicted_labels, num_classes=5).permute(0, 3, 1, 2)
-        iou = compute_iou(predictions, targets)
+        predicted_labels = F.one_hot(predicted_labels, num_classes=5).permute(0, 3, 1, 2)
+        iou = compute_iou(predicted_labels, targets)
         total_iou += iou.item()
         total_loss += loss.item()
         ongoing_iou = total_iou/(batch_idx+1)
@@ -101,7 +101,7 @@ def validate_model(loader, model, loss_fn):
     with torch.no_grad():  # Disable gradient calculation
         for batch_idx, (data, targets) in enumerate(loader):
             data = data.to(device=DEVICE)
-            # targets = F.one_hot(targets, num_classes=5).permute(0, 3, 1, 2)
+            targets = F.one_hot(targets, num_classes=5).permute(0, 3, 1, 2)
             targets = targets.float().to(device=DEVICE)
 
             predictions = model(data)
@@ -109,9 +109,9 @@ def validate_model(loader, model, loss_fn):
 
             val_loss += loss.item()
 
-            # predicted_labels = torch.argmax(predictions, dim=1)
-            # predicted_labels = F.one_hot(predicted_labels, num_classes=5).permute(0, 3, 1, 2)
-            iou = compute_iou(predictions, targets)
+            predicted_labels = torch.argmax(predictions, dim=1)
+            predicted_labels = F.one_hot(predicted_labels, num_classes=5).permute(0, 3, 1, 2)
+            iou = compute_iou(predicted_labels, targets)
             total_iou += iou.item()
 
             total_batches += 1
@@ -123,7 +123,7 @@ def validate_model(loader, model, loss_fn):
 
 def main():
     # create model
-    model = UNet(in_channels=3, out_channels=1).to(DEVICE)
+    model = UNet(in_channels=3, out_channels=5).to(DEVICE)
     # create loss function
     # non binary cross entropy loss is used for multi-class classification
     loss_fn  = nn.CrossEntropyLoss()
