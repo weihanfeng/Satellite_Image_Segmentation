@@ -1,0 +1,15 @@
+files:
+  TRAIN_IMG_DIR : "data/selected_data_split/train/"
+  VAL_IMG_DIR : "data/selected_data_split/val/"
+
+dataloader: 
+  BATCH_SIZE: 32
+  NUM_WORKERS: 4
+  PIN_MEMORY: False
+
+model: 
+  LEARNING_RATE: 0.0001
+  IN_CHANNELS: 3
+  OUT_CHANNELS: 5
+  FEATURE_NUMS: [64, 128, 256, 512]
+  NUM_EPOCHS: 3
