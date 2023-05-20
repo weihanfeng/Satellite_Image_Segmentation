@@ -18,8 +18,6 @@ def main(cfg: DictConfig):
         image_dir=cfg["files"]["TRAIN_IMG_DIR"],
         transform=Transform(),
     )
-    print(cfg["files"]["TRAIN_IMG_DIR"])
-    print(len(train_dataset))
     val_dataset = SegmentationDataset(
         image_dir=cfg["files"]["VAL_IMG_DIR"],
         transform=Transform(),
