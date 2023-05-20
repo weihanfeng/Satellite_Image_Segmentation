@@ -107,13 +107,13 @@ class ImageSegmentationModel(nn.Module):
         loss_fn=nn.CrossEntropyLoss(),
     ):
         super().__init__()
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self.model = model.to(self.device)
         self.learning_rate = learning_rate
         self.loss_fn = loss_fn
         self.num_classes = num_classes
         self.optimizer = optimizer(self.model.parameters(), lr=self.learning_rate)
-        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.scaler = torch.cuda.amp.GradScaler()
-        self.model = model.to(self.device)
 
     def forward(self, x):
         return self.model(x)
