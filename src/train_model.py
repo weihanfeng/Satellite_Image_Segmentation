@@ -16,7 +16,6 @@ torch.multiprocessing.set_sharing_strategy("file_system")
 @hydra.main(config_path="../conf", config_name="config", version_base=None)
 def main(cfg: DictConfig):
     logger.info("Starting model training...")
-    logger.info(f"Using device: {cfg['model']['DEVICE']}")
     logger.info(f"Creating train and validation dataloader...")
     # create train and validation dataset
     train_dataset = SegmentationDataset(
@@ -51,7 +50,7 @@ def main(cfg: DictConfig):
     logger.info("Start training...")
     # train model
     for epoch in range(cfg["model"]["NUM_EPOCHS"]):
-        print(f"Epoch {epoch+1}/{cfg['model']['NUM_EPOCHS']}")
+        logger.info(f"Epoch {epoch+1}/{cfg['model']['NUM_EPOCHS']}")
         segmentation_model = ImageSegmentationModel(
             model=model,
             in_channels=3,
