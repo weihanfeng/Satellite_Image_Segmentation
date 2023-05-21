@@ -7,6 +7,7 @@ files:
   SPLIT_DIR: "data/split/"
   TRAIN_IMG_DIR : "data/split/train/"
   VAL_IMG_DIR : "data/split/val/"
+  TEST_IMG_DIR : "data/split/test/"
 
 data_ingestion:
   FLAG: True
