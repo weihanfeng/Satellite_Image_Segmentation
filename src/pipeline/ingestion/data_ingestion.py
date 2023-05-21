@@ -36,6 +36,10 @@ class DataIngestion:
         with zipfile.ZipFile(self.file_path, 'r') as zip_ref:
             zip_ref.extractall(self.extract_path)
 
+    def get_size(self):
+        """Get size of downloaded zip file in gb"""
+        return os.path.getsize(self.file_path) / (1024 * 1024 * 1024)
+
 if __name__ == "__main__":
     URL = "https://landcover.ai.linuxpolska.com/download/landcover.ai.v1.zip"
     FILE_PATH = os.path.join(os.getcwd(), "data", "data.zip")
