@@ -13,11 +13,6 @@ class TRAIN_TEST_SPLIT:
         # create output folder
         if not os.path.exists(output_dir):
             os.makedirs(output_dir)
-        # print number of subfolders and respective number of files in input dir
-        print("Number of subfolders and respective number of files in input dir:")
-        for root, sub_dirs, files in os.walk(input_dir):
-            print(root, ": ", len(files))
-
         splitfolders.ratio(
             input_dir,
             output_dir,
@@ -25,15 +20,6 @@ class TRAIN_TEST_SPLIT:
             ratio=(self.train_ratio, self.val_ratio, self.test_ratio),
             move=True,
         )
-        # print number of subfolders and respective number of files in output dir
-        print("Number of subfolders and respective number of files in output dir:")
-        for root, sub_dirs, files in os.walk(output_dir):
-            print(root, ": ", len(files))
-        # Print folder structure of output dir
-        print("Folder structure of output dir:")
-        for root, sub_dirs, files in os.walk(output_dir):
-            print(root, ": ", sub_dirs)
-        
         # remove input dir
         shutil.rmtree(input_dir)
 
