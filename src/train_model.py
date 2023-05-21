@@ -7,12 +7,17 @@ from torch.utils.data import DataLoader
 import torch.multiprocessing
 import hydra
 from omegaconf import DictConfig
+import logging
 
+logger = logging.getLogger(__name__)
 torch.multiprocessing.set_sharing_strategy("file_system")
 
 
 @hydra.main(config_path="../conf", config_name="config", version_base=None)
 def main(cfg: DictConfig):
+    logger.info("Starting model training...")
+    logger.info(f"Using device: {cfg['model']['DEVICE']}")
+    logger.info(f"Creating train and validation dataloader...")
     # create train and validation dataset
     train_dataset = SegmentationDataset(
         image_dir=cfg["files"]["TRAIN_IMG_DIR"],
@@ -42,6 +47,8 @@ def main(cfg: DictConfig):
         in_channels=cfg["model"]["IN_CHANNELS"],
         out_channels=cfg["model"]["OUT_CHANNELS"],
     )
+    logger.info(f"Model architecture: {model}")
+    logger.info("Start training...")
     # train model
     for epoch in range(cfg["model"]["NUM_EPOCHS"]):
         print(f"Epoch {epoch+1}/{cfg['model']['NUM_EPOCHS']}")
@@ -59,9 +66,9 @@ def main(cfg: DictConfig):
             train_loader, mode="train"
         )
         val_loss, val_iou = segmentation_model.train_val_epoch(val_loader, mode="val")
-        print(f"Training Loss: {train_loss:.4f} | Training IoU: {train_iou:.4f}")
-        print(f"Validation Loss: {val_loss:.4f} | Validation IoU: {val_iou:.4f}")
-        print("---------------------------------------")
+        logger.info(f"Training Loss: {train_loss:.4f} | Training IoU: {train_iou:.4f}")
+        logger.info(f"Validation Loss: {val_loss:.4f} | Validation IoU: {val_iou:.4f}")
+        logger.info("---------------------------------------")
 
 
 if __name__ == "__main__":

@@ -5,6 +5,10 @@ import hydra
 from omegaconf import DictConfig
 import os
 import shutil
+import logging
+from utils import get_num_files
+
+logger = logging.getLogger(__name__)
 
 
 @hydra.main(config_path="../conf", config_name="config", version_base=None)
@@ -13,6 +17,7 @@ def ingest_and_process_data(cfg: DictConfig):
     Download data, split image and perform train-test-val split
     """
     # Ingest data if FLAG is True
+    logging.info("Ingesting data...")
     if cfg["data_ingestion"]["FLAG"]:
         URL = cfg["data_ingestion"]["URL"]
         FILE_PATH = os.path.join(
@@ -20,10 +25,19 @@ def ingest_and_process_data(cfg: DictConfig):
         )
         EXTRACT_PATH = os.path.join(os.getcwd(), cfg["files"]["DATA_DIR"])
         DATA_INGESTION = DataIngestion(URL, FILE_PATH, EXTRACT_PATH)
+        logging.info("Start downloading data...")
         DATA_INGESTION.download_data()
+        logging.info("Start extracting data...")
         DATA_INGESTION.extract_data()
+        logging.info(
+            "Number of extracted images: "
+            + str(get_num_files(cfg["files"]["DL_IMG_DIR"]))
+        )
 
     # Split image
+    logger.info(
+        f"Splitting images into image patches of size {cfg['data_split']['split_image']['PATCH_SIZE']}..."
+    )
     data_split = DataSplit(
         patch_size=cfg["data_split"]["split_image"]["PATCH_SIZE"],
         image_dir=cfg["files"]["DL_IMG_DIR"],
@@ -33,6 +47,7 @@ def ingest_and_process_data(cfg: DictConfig):
     )
     data_split._split_and_select_patches()
 
+    logger.info("Splitting into train-test-val dir...")
     # Train-test-val split
     train_test_split = TRAIN_TEST_SPLIT(
         seed=cfg["data_split"]["train_val_split"]["RANDOM_STATE"],
@@ -44,10 +59,11 @@ def ingest_and_process_data(cfg: DictConfig):
     )
 
     # Remove DL dir
+    logger.info("Removing downloaded data...")
     shutil.rmtree(cfg["files"]["DL_IMG_DIR"])
     shutil.rmtree(cfg["files"]["DL_MASK_DIR"])
     os.remove(os.path.join(cfg["files"]["DATA_DIR"], cfg["files"]["FILE_NAME"]))
-
-
+    logger.info("Data ingestion and processing completed.")
+    
 if __name__ == "__main__":
     ingest_and_process_data()
