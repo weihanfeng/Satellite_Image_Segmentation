@@ -42,13 +42,13 @@ def main(cfg: DictConfig):
         shuffle=False,
     )
 
-    # model = UNet(
-    #     in_channels=cfg["model"]["IN_CHANNELS"],
-    #     out_channels=cfg["model"]["OUT_CHANNELS"],
-    # )
-    model = UNetWithResnet50Encoder(
-        n_classes=5,
+    model = UNet(
+        in_channels=cfg["model"]["IN_CHANNELS"],
+        out_channels=cfg["model"]["OUT_CHANNELS"],
     )
+    # model = UNetWithResnet50Encoder(
+    #     n_classes=5,
+    # )
     logger.info(f"Model architecture: {model}")
     logger.info("Start training...")
     # train model
