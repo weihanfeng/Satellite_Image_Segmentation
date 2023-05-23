@@ -6,10 +6,9 @@ from omegaconf import DictConfig
 import os
 import shutil
 import logging
-from utils import get_num_files
+from utils import get_num_files, setup_logging
 
-logger = logging.getLogger(__name__)
-
+setup_logging(logging_config_path="./conf/base/logging.yaml")
 
 @hydra.main(config_path="../conf", config_name="config", version_base=None)
 def ingest_and_process_data(cfg: DictConfig):
@@ -35,7 +34,7 @@ def ingest_and_process_data(cfg: DictConfig):
         )
 
     # Split image
-    logger.info(
+    logging.info(
         f"Splitting images into image patches of size {cfg['data_split']['split_image']['PATCH_SIZE']}..."
     )
     data_split = DataSplit(
@@ -47,7 +46,7 @@ def ingest_and_process_data(cfg: DictConfig):
     )
     data_split._split_and_select_patches()
 
-    logger.info("Splitting into train-test-val dir...")
+    logging.info("Splitting into train-test-val dir...")
     # Train-test-val split
     train_test_split = TRAIN_TEST_SPLIT(
         seed=cfg["data_split"]["train_val_split"]["RANDOM_STATE"],
@@ -59,11 +58,11 @@ def ingest_and_process_data(cfg: DictConfig):
     )
 
     # Remove DL dir
-    logger.info("Removing downloaded data...")
+    logging.info("Removing downloaded data...")
     shutil.rmtree(cfg["files"]["DL_IMG_DIR"])
     shutil.rmtree(cfg["files"]["DL_MASK_DIR"])
     os.remove(os.path.join(cfg["files"]["DATA_DIR"], cfg["files"]["FILE_NAME"]))
-    logger.info("Data ingestion and processing completed.")
+    logging.info("Data ingestion and processing completed.")
     
 if __name__ == "__main__":
     ingest_and_process_data()
