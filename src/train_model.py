@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from pipeline.modeling.models import UNet, ImageSegmentationModel
+from pipeline.modeling.models import UNet, ImageSegmentationModel, UNetWithResnet50Encoder
 from pipeline.modeling.dataset import SegmentationDataset, Transform
 from torch.utils.data import DataLoader
 import torch.multiprocessing
@@ -42,9 +42,12 @@ def main(cfg: DictConfig):
         shuffle=False,
     )
 
-    model = UNet(
-        in_channels=cfg["model"]["IN_CHANNELS"],
-        out_channels=cfg["model"]["OUT_CHANNELS"],
+    # model = UNet(
+    #     in_channels=cfg["model"]["IN_CHANNELS"],
+    #     out_channels=cfg["model"]["OUT_CHANNELS"],
+    # )
+    model = UNetWithResnet50Encoder(
+        n_classes=5,
     )
     logger.info(f"Model architecture: {model}")
     logger.info("Start training...")
