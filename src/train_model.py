@@ -58,7 +58,7 @@ def main(cfg: DictConfig):
         model_artifact = load_model(cfg["files"]["MODEL_READ_PATH"])
         model.load_state_dict(model_artifact["state_dict"])
         last_epoch = model_artifact["epoch"]
-        optimizer.load_state_dict(model_artifact["optimizer"])
+        # optimizer.load_state_dict(model_artifact["optimizer"])
 
     logging.info(f"Model architecture: {model.__class__.__name__}")
     logging.info("Start training...")
