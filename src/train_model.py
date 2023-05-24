@@ -52,7 +52,7 @@ def main(cfg: DictConfig):
         n_classes=5,
     )
     optimizer = optim.Adam
-    last_epoch = 1
+    last_epoch = 0
     if cfg["model"]["LOAD_MODEL"]:
         logging.info("Loading model...")
         model_artifact = load_model(model, cfg["files"]["MODEL_READ_PATH"])
