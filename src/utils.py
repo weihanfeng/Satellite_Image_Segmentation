@@ -4,9 +4,6 @@ import os
 import yaml
 import torch
 
-logger = logging.getLogger(__name__)
-
-
 def setup_logging(
     logging_config_path="./conf/base/logging.yaml", default_level=logging.INFO
 ):
@@ -38,10 +35,10 @@ def get_num_files(path):
 
 def save_model(checkpoint, model_dir):
     """Save model checkpoint"""
-    logger.info("Saving model checkpoint")
+    logging.info("Saving model checkpoint")
     torch.save(checkpoint, model_dir)
 
 def load_model(model_dir):
     """Load model checkpoint"""
-    logger.info("Loading model checkpoint")
+    logging.info("Loading model checkpoint")
     return torch.load(model_dir)

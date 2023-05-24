@@ -64,7 +64,7 @@ def main(cfg: DictConfig):
     logging.info("Start training...")
     # train model
     best_loss = float("inf")
-    for epoch in range(last_epoch, cfg["model"]["NUM_EPOCHS"]):
+    for epoch in range(last_epoch, last_epoch+cfg["model"]["NUM_EPOCHS"]):
         logging.info(f"Epoch {epoch+1}/{cfg['model']['NUM_EPOCHS']}")
         segmentation_model = ImageSegmentationModel(
             model=model,
@@ -82,7 +82,6 @@ def main(cfg: DictConfig):
         val_loss, val_iou = segmentation_model.train_val_epoch(val_loader, mode="val")
         logging.info(f"Training Loss: {train_loss:.4f} | Training IoU: {train_iou:.4f}")
         logging.info(f"Validation Loss: {val_loss:.4f} | Validation IoU: {val_iou:.4f}")
-        logging.info("---------------------------------------")
 
         # save checkpoint
         checkpoint = {
@@ -96,6 +95,7 @@ def main(cfg: DictConfig):
         if val_loss < best_loss:
             best_loss = val_loss
             save_model(checkpoint, cfg["files"]["MODEL_SAVE_PATH"])
+        logging.info("---------------------------------------")
 
 
 if __name__ == "__main__":
