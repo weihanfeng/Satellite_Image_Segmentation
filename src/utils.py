@@ -2,6 +2,7 @@ import logging
 import logging.config
 import os
 import yaml
+import torch
 
 logger = logging.getLogger(__name__)
 
@@ -31,7 +32,16 @@ def setup_logging(
         logger.info(error)
         logger.info("Logging config file is not found. Basic config is being used.")
 
-
 def get_num_files(path):
     """Get number of files in extracted folder"""
     return len(os.listdir(path))
+
+def save_model(checkpoint, model_dir):
+    """Save model checkpoint"""
+    logger.info("Saving model checkpoint")
+    torch.save(checkpoint, model_dir)
+
+def load_model(model_dir):
+    """Load model checkpoint"""
+    logger.info("Loading model checkpoint")
+    return torch.load(model_dir)
