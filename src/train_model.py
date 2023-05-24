@@ -55,7 +55,7 @@ def main(cfg: DictConfig):
     last_epoch = 1
     if cfg["model"]["LOAD_MODEL"]:
         logging.info("Loading model...")
-        model_artifact = load_model(model, cfg["files"]["MODEL_PATH"])
+        model_artifact = load_model(model, cfg["files"]["MODEL_READ_PATH"])
         model.load_state_dict(model_artifact["state_dict"])
         last_epoch = model_artifact["epoch"]
         optimizer.load_state_dict(model_artifact["optimizer"])
@@ -95,7 +95,7 @@ def main(cfg: DictConfig):
         # save model if validation loss decreases
         if val_loss < best_loss:
             best_loss = val_loss
-            save_model(checkpoint, cfg["files"]["MODEL_PATH"])
+            save_model(checkpoint, cfg["files"]["MODEL_SAVE_PATH"])
 
 
 if __name__ == "__main__":
