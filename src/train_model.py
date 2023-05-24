@@ -55,7 +55,7 @@ def main(cfg: DictConfig):
     last_epoch = 0
     if cfg["model"]["LOAD_MODEL"]:
         logging.info("Loading model...")
-        model_artifact = load_model(model, cfg["files"]["MODEL_READ_PATH"])
+        model_artifact = load_model(cfg["files"]["MODEL_READ_PATH"])
         model.load_state_dict(model_artifact["state_dict"])
         last_epoch = model_artifact["epoch"]
         optimizer.load_state_dict(model_artifact["optimizer"])
