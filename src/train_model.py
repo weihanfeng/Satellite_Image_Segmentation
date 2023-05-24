@@ -43,6 +43,7 @@ def main(cfg: DictConfig):
         shuffle=False,
     )
 
+    # Load model
     # model = UNet(
     #     in_channels=cfg["model"]["IN_CHANNELS"],
     #     out_channels=cfg["model"]["OUT_CHANNELS"],
@@ -50,11 +51,20 @@ def main(cfg: DictConfig):
     model = UNetWithResnet50Encoder(
         n_classes=5,
     )
+    optimizer = optim.Adam
+    last_epoch = 1
+    if cfg["model"]["LOAD_MODEL"]:
+        logging.info("Loading model...")
+        model_artifact = load_model(model, cfg["files"]["MODEL_PATH"])
+        model.load_state_dict(model_artifact["state_dict"])
+        last_epoch = model_artifact["epoch"]
+        optimizer.load_state_dict(model_artifact["optimizer"])
+
     logging.info(f"Model architecture: {model}")
     logging.info("Start training...")
     # train model
     best_loss = float("inf")
-    for epoch in range(cfg["model"]["NUM_EPOCHS"]):
+    for epoch in range(last_epoch, cfg["model"]["NUM_EPOCHS"]):
         logging.info(f"Epoch {epoch+1}/{cfg['model']['NUM_EPOCHS']}")
         segmentation_model = ImageSegmentationModel(
             model=model,
@@ -63,7 +73,7 @@ def main(cfg: DictConfig):
             num_classes=5,
             feature_nums=cfg["model"]["FEATURE_NUMS"],
             learning_rate=cfg["model"]["LEARNING_RATE"],
-            optimizer=optim.Adam,
+            optimizer=optimizer,
             loss_fn=nn.CrossEntropyLoss(),
         )
         train_loss, train_iou = segmentation_model.train_val_epoch(
@@ -86,7 +96,6 @@ def main(cfg: DictConfig):
         if val_loss < best_loss:
             best_loss = val_loss
             save_model(checkpoint, cfg["files"]["MODEL_PATH"])
-
 
 
 if __name__ == "__main__":
