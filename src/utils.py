@@ -4,6 +4,8 @@ import os
 import yaml
 import torch
 
+logger = logging.Logger(__name__)
+
 def setup_logging(
     logging_config_path="./conf/base/logging.yaml", default_level=logging.INFO
 ):
