@@ -1,7 +1,11 @@
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from pipeline.modeling.models import UNet, ImageSegmentationModel, UNetWithResnet50Encoder
+from pipeline.modeling.models import (
+    UNet,
+    ImageSegmentationModel,
+    UNetWithResnet50Encoder,
+)
 from pipeline.modeling.dataset import SegmentationDataset, Transform
 from utils import setup_logging, save_model, load_model
 from torch.utils.data import DataLoader
@@ -14,11 +18,12 @@ torch.multiprocessing.set_sharing_strategy("file_system")
 
 setup_logging()
 
+
 @hydra.main(config_path="../conf", config_name="config", version_base=None)
 def main(cfg: DictConfig):
+    # create train and validation dataset
     logging.info("Starting model training...")
     logging.info(f"Creating train and validation dataloader...")
-    # create train and validation dataset
     train_dataset = SegmentationDataset(
         image_dir=cfg["files"]["TRAIN_IMG_DIR"],
         transform=Transform(),
@@ -64,8 +69,9 @@ def main(cfg: DictConfig):
     logging.info(f"Model architecture: {model.__class__.__name__}")
     logging.info("Start training...")
     best_loss = float("inf")
-    for epoch in range(last_epoch, last_epoch+cfg["model"]["NUM_EPOCHS"]):
-        logging.info(f"Epoch {epoch+1}/{cfg['model']['NUM_EPOCHS']}")
+    total_epoch = last_epoch + cfg["model"]["NUM_EPOCHS"]
+    for epoch in range(last_epoch, total_epoch):
+        logging.info(f"Epoch {epoch+1}/{total_epoch}")
         segmentation_model = ImageSegmentationModel(
             model=model,
             in_channels=3,
