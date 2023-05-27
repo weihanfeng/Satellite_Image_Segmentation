@@ -3,6 +3,8 @@ import logging.config
 import os
 import yaml
 import torch
+import cv2
+import matplotlib.pyplot as plt
 
 logger = logging.Logger(__name__)
 
@@ -40,7 +42,25 @@ def save_model(checkpoint, model_dir):
     logging.info("Saving model checkpoint")
     torch.save(checkpoint, model_dir)
 
-def load_model(model_dir):
+def load_model(model_dir, cpu=False):
     """Load model checkpoint"""
     logging.info("Loading model checkpoint")
-    return torch.load(model_dir)
+    if cpu:
+        model = torch.load(model_dir, map_location=torch.device("cpu"))
+    else:
+        model = torch.load(model_dir)
+    return model
+
+def view_image_and_mask(image_path, mask_path):
+    """
+    View image and mask
+    """
+    if not os.path.exists(image_path):
+        print("Image path does not exist")
+        return None
+    image = cv2.imread(image_path, 1)
+    mask = cv2.imread(mask_path)
+    fig, ax = plt.subplots(1,2, figsize=(10, 10))
+    ax[0].imshow(image)
+    ax[1].imshow(mask[:,:,0])
+    plt.show()

@@ -6,7 +6,7 @@ from omegaconf import DictConfig
 import os
 import shutil
 import logging
-from utils import get_num_files, setup_logging
+from utils.general_utils import get_num_files, setup_logging
 
 setup_logging(logging_config_path="./conf/base/logging.yaml")
 

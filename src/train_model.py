@@ -7,7 +7,7 @@ from pipeline.modeling.models import (
     UNetWithResnet50Encoder,
 )
 from pipeline.modeling.dataset import SegmentationDataset, Transform
-from utils import setup_logging, save_model, load_model
+from utils.general_utils import setup_logging, save_model, load_model
 from torch.utils.data import DataLoader
 import torch.multiprocessing
 import hydra
@@ -49,13 +49,13 @@ def main(cfg: DictConfig):
     )
 
     # Load model a
-    # model = UNet(
-    #     in_channels=cfg["model"]["IN_CHANNELS"],
-    #     out_channels=cfg["model"]["OUT_CHANNELS"],
-    # )
-    model = UNetWithResnet50Encoder(
-        n_classes=5,
+    model = UNet(
+        in_channels=cfg["model"]["IN_CHANNELS"],
+        out_channels=cfg["model"]["OUT_CHANNELS"],
     )
+    # model = UNetWithResnet50Encoder(
+    #     n_classes=5,
+    # )
     optimizer = optim.Adam
     last_epoch = 0
     if cfg["model"]["LOAD_MODEL"]:
