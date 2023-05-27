@@ -43,7 +43,7 @@ def main(cfg: DictConfig):
         shuffle=False,
     )
 
-    # Load model
+    # Load model a
     # model = UNet(
     #     in_channels=cfg["model"]["IN_CHANNELS"],
     #     out_channels=cfg["model"]["OUT_CHANNELS"],
@@ -60,9 +60,9 @@ def main(cfg: DictConfig):
         last_epoch = model_artifact["epoch"]
         # optimizer.load_state_dict(model_artifact["optimizer"])
 
+    # train model
     logging.info(f"Model architecture: {model.__class__.__name__}")
     logging.info("Start training...")
-    # train model
     best_loss = float("inf")
     for epoch in range(last_epoch, last_epoch+cfg["model"]["NUM_EPOCHS"]):
         logging.info(f"Epoch {epoch+1}/{cfg['model']['NUM_EPOCHS']}")
@@ -76,6 +76,7 @@ def main(cfg: DictConfig):
             optimizer=optimizer,
             loss_fn=nn.CrossEntropyLoss(),
         )
+        # Get train and validation loss and iou
         train_loss, train_iou = segmentation_model.train_val_epoch(
             train_loader, mode="train"
         )
@@ -83,15 +84,14 @@ def main(cfg: DictConfig):
         logging.info(f"Training Loss: {train_loss:.4f} | Training IoU: {train_iou:.4f}")
         logging.info(f"Validation Loss: {val_loss:.4f} | Validation IoU: {val_iou:.4f}")
 
-        # save checkpoint
+        # save checkpoint if validation loss decreases
         checkpoint = {
             "state_dict": segmentation_model.model.state_dict(),
-            "optimizer": segmentation_model.optimizer.state_dict(),
+            # "optimizer": segmentation_model.optimizer.state_dict(),
             "epoch": epoch,
             "losses": {"train_loss": train_loss, "val_loss": val_loss},
             "iou": {"train_iou": train_iou, "val_iou": val_iou},
         }
-        # save model if validation loss decreases
         if val_loss < best_loss:
             best_loss = val_loss
             save_model(checkpoint, cfg["files"]["MODEL_SAVE_PATH"])
