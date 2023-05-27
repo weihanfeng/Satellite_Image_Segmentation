@@ -26,7 +26,7 @@ data_split:
 
 dataloader: 
   BATCH_SIZE: 32
-  NUM_WORKERS: 4
+  NUM_WORKERS: 2
   PIN_MEMORY: False
 
 model: 
