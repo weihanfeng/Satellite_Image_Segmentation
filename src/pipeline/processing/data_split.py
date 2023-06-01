@@ -19,6 +19,8 @@ class DataSplit:
         self.threshold = selection_threshold
         self.labels_to_remove = labels_to_remove
         self.new_label_map = new_label_map
+        # change k:v from uint8: uint8 to int: int
+        self.new_label_map = {int(k): int(v) for k, v in self.new_label_map.items()}
 
     
     def split_and_select_patches(self):
