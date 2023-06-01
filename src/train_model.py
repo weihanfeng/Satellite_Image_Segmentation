@@ -49,13 +49,14 @@ def main(cfg: DictConfig):
     )
 
     # Load model a
-    model = UNet(
-        in_channels=cfg["model"]["IN_CHANNELS"],
-        out_channels=cfg["model"]["OUT_CHANNELS"],
-    )
-    # model = UNetWithResnet50Encoder(
-    #     n_classes=5,
+    # model = UNet(
+    #     in_channels=cfg["model"]["IN_CHANNELS"],
+    #     out_channels=cfg["model"]["OUT_CHANNELS"],
     # )
+    model = UNetWithResnet50Encoder(
+        last_n_layers_to_unfreeze=cfg["model"]["LAST_N_LAYERS_TO_UNFREEZE"], 
+        n_classes=5,
+    )
     optimizer = optim.Adam
     last_epoch = 0
     if cfg["model"]["LOAD_MODEL"]:

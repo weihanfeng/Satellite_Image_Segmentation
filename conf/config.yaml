@@ -8,8 +8,8 @@ files:
   TRAIN_IMG_DIR : "data/split/train/"
   VAL_IMG_DIR : "data/split/val/"
   TEST_IMG_DIR : "data/split/test/"
-  MODEL_READ_PATH: "../drive/MyDrive/sis_models/UNet.pth"
-  MODEL_SAVE_PATH: "../drive/MyDrive/sis_models/UNet.pth"
+  MODEL_READ_PATH: "../drive/MyDrive/sis_models/UNetWithResnet50Encoder_unfreeze2.pth"
+  MODEL_SAVE_PATH: "../drive/MyDrive/sis_models/UNetWithResnet50Encoder_unfreeze2.pth"
 
 data_ingestion:
   FLAG: True
@@ -34,5 +34,6 @@ model:
   IN_CHANNELS: 3
   OUT_CHANNELS: 5
   FEATURE_NUMS: [64, 128, 256, 512]
-  NUM_EPOCHS: 10
-  LOAD_MODEL: True
+  NUM_EPOCHS: 13
+  LAST_N_LAYERS_TO_UNFREEZE: 2
+  LOAD_MODEL: False
