@@ -233,10 +233,7 @@ class ImageSegmentationModel(nn.Module):
     def __init__(
         self,
         model = UNet,
-        in_channels=3,
-        out_channels=5,
         num_classes=5,
-        feature_nums=[64, 128, 256, 512],
         learning_rate=0.001,
         optimizer=torch.optim.Adam,
         loss_fn=nn.CrossEntropyLoss(),
