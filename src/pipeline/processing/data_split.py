@@ -11,15 +11,16 @@ from tqdm import tqdm
 
 class DataSplit:
 
-    def __init__(self, patch_size, image_dir, mask_dir, output_dir, selection_threshold=0.95):
+    def __init__(self, patch_size, image_dir, mask_dir, output_dir, selection_threshold, labels_to_remove):
         self.patch_size = patch_size
         self.image_dir = image_dir
         self.mask_dir = mask_dir
         self.output_dir = output_dir
         self.threshold = selection_threshold
+        self.labels_to_remove = labels_to_remove
 
     
-    def _split_and_select_patches(self):
+    def split_and_select_patches(self):
         """Split and select images and corresponding mask, then save to folder"""
         # Get image names
         # have tqdm to show progress bar for loop
@@ -38,6 +39,7 @@ class DataSplit:
                 # Select patches
                 for i in range(image_patches.shape[0]):
                     for j in range(image_patches.shape[1]):
+                        # If true, write
                         if self._select_patches(mask_patches[i,j]):
                             if not os.path.exists(self.output_dir):
                                 os.makedirs(self.output_dir)
@@ -86,19 +88,16 @@ class DataSplit:
         return patches        
 
     def _select_patches(self, mask_patch):
-        """return true if the patch has significant variation in labels"""
+        """return true if the patch has significant variation in labels or contains labels to remove"""
         pixel_counts = np.unique(mask_patch, return_counts=True)[1]
         pixel_percentage = pixel_counts / pixel_counts.sum()
+        if self.labels_to_remove is not None:
+            # Find unique labels
+            unique_labels = np.unique(mask_patch)
+            # Check if unique labels are in labels_to_remove
+            if np.isin(unique_labels, self.labels_to_remove).any():
+                return False
         if max(pixel_percentage) < self.threshold:
             return True
         else:
             return False
-
-if __name__ == "__main__":
-    patch_size = 256
-    image_dir = "data/images"
-    mask_dir = "data/masks"
-    output_dir = "data/selected_data"
-
-    data_split = DataSplit(patch_size, image_dir, mask_dir, output_dir, selection_threshold=0.95)
-    data_split._split_and_select_patches()
