@@ -54,6 +54,7 @@ def ingest_and_process_data(cfg: DictConfig):
         output_dir=cfg["files"]["INTERIM_DIR"],
         labels_to_remove=cfg["data_split"]["split_image"]["LABELS_TO_REMOVE"],
         selection_threshold=cfg["data_split"]["split_image"]["SELECTION_THRESHOLD"],
+        new_label_map=cfg["data_split"]["split_image"]["NEW_LABEL_MAP"],
     )
     data_split.split_and_select_patches()
 

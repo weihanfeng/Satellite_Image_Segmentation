@@ -11,13 +11,14 @@ from tqdm import tqdm
 
 class DataSplit:
 
-    def __init__(self, patch_size, image_dir, mask_dir, output_dir, selection_threshold, labels_to_remove):
+    def __init__(self, patch_size, image_dir, mask_dir, output_dir, selection_threshold, labels_to_remove, new_label_map):
         self.patch_size = patch_size
         self.image_dir = image_dir
         self.mask_dir = mask_dir
         self.output_dir = output_dir
         self.threshold = selection_threshold
         self.labels_to_remove = labels_to_remove
+        self.new_label_map = new_label_map
 
     
     def split_and_select_patches(self):
@@ -92,6 +93,8 @@ class DataSplit:
         pixel_counts = np.unique(mask_patch, return_counts=True)[1]
         pixel_percentage = pixel_counts / pixel_counts.sum()
         if self.labels_to_remove is not None:
+            # Remap mask labels according to a mapping dict
+            mask_patch = np.vectorize(self.mapping.get)(mask_patch)
             # Find unique labels
             unique_labels = np.unique(mask_patch)
             # Check if unique labels are in labels_to_remove
