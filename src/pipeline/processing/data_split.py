@@ -94,7 +94,7 @@ class DataSplit:
         pixel_percentage = pixel_counts / pixel_counts.sum()
         if self.labels_to_remove is not None:
             # Remap mask labels according to a mapping dict
-            mask_patch = np.vectorize(self.mapping.get)(mask_patch)
+            mask_patch = np.vectorize(self.new_label_map.get)(mask_patch)
             # Find unique labels
             unique_labels = np.unique(mask_patch)
             # Check if unique labels are in labels_to_remove
