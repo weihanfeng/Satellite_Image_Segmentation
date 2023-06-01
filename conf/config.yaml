@@ -40,7 +40,7 @@ dataloader:
 model: 
   LEARNING_RATE: 0.0001
   IN_CHANNELS: 3
-  OUT_CHANNELS: 8
+  OUT_CHANNELS: 7
   FEATURE_NUMS: [64, 128, 256, 512]
   NUM_EPOCHS: 13
   LAST_N_LAYERS_TO_UNFREEZE: 1 # Unfreeze last n layers of pretrained backbone
