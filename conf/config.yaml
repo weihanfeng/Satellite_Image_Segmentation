@@ -19,11 +19,11 @@ files:
 
 data_ingestion:
   FLAG: True
-  DOWNLOAD_FLAG: False
-  DOWNLOAD_FROM_GDRIVE: False
+  DOWNLOAD_FLAG: True
+  DOWNLOAD_FROM_GDRIVE: True
   # Gdrive id "1xbnKVN5aRMlpxISXgutzQO0hPT_b4lMi" or "https://zenodo.org/record/5706578/files/Train.zip?download=1"
   # Or https://landcover.ai.linuxpolska.com/download/landcover.ai.v1.zip for another dataset
-  URL: "https://zenodo.org/record/5706578/files/Train.zip?download=1"
+  URL: "1EyfuxY9Dkb_l4bZfRcHeKZwD3NMX2xwc"
 
 data_split:
   split_image:
