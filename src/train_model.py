@@ -55,7 +55,7 @@ def main(cfg: DictConfig):
     # )
     model = UNetWithResnet50Encoder(
         last_n_layers_to_unfreeze=cfg["model"]["LAST_N_LAYERS_TO_UNFREEZE"], 
-        n_classes=5,
+        n_classes=cfg["model"]["OUT_CHANNELS"],
     )
     optimizer = optim.Adam
     last_epoch = 0
@@ -75,10 +75,7 @@ def main(cfg: DictConfig):
         logging.info(f"Epoch {epoch+1}/{total_epoch}")
         segmentation_model = ImageSegmentationModel(
             model=model,
-            in_channels=3,
-            out_channels=5,
-            num_classes=5,
-            feature_nums=cfg["model"]["FEATURE_NUMS"],
+            num_classes=cfg["model"]["OUT_CHANNELS"],
             learning_rate=cfg["model"]["LEARNING_RATE"],
             optimizer=optimizer,
             loss_fn=nn.CrossEntropyLoss(),
