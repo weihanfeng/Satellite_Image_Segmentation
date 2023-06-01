@@ -25,12 +25,21 @@ def ingest_and_process_data(cfg: DictConfig):
         EXTRACT_PATH = os.path.join(os.getcwd(), cfg["files"]["DATA_DIR"])
         DATA_INGESTION = DataIngestion(URL, FILE_PATH, EXTRACT_PATH)
         logging.info("Start downloading data...")
-        DATA_INGESTION.download_data()
+        DATA_INGESTION.download_data(cfg["data_ingestion"]["DOWNLOAD_FROM_GDRIVE"])
         logging.info("Start extracting data...")
         DATA_INGESTION.extract_data()
-        logging.info(
+        logging.info("Moving files from DL dirs to DEST dirs...")
+        DATA_INGESTION.move_files(
+            src_paths=cfg["files"]["DL_IMG_DIRS"],
+            dest=cfg["files"]["DEST_IMG_DIR"],
+        )
+        DATA_INGESTION.move_files(
+            src_paths=cfg["files"]["DL_MASK_DIRS"],
+            dest=cfg["files"]["DEST_MASK_DIR"],
+        )
+    logging.info(
             "Number of extracted images: "
-            + str(get_num_files(cfg["files"]["DL_IMG_DIR"]))
+            + str(get_num_files(cfg["files"]["DEST_IMG_DIR"]))
         )
 
     # Split image
@@ -39,12 +48,13 @@ def ingest_and_process_data(cfg: DictConfig):
     )
     data_split = DataSplit(
         patch_size=cfg["data_split"]["split_image"]["PATCH_SIZE"],
-        image_dir=cfg["files"]["DL_IMG_DIR"],
-        mask_dir=cfg["files"]["DL_MASK_DIR"],
+        image_dir=cfg["files"]["DEST_IMG_DIR"],
+        mask_dir=cfg["files"]["DEST_MASK_DIR"],
         output_dir=cfg["files"]["INTERIM_DIR"],
-        selection_threshold=0.95,
+        labels_to_remove=cfg["data_split"]["split_image"]["LABELS_TO_REMOVE"],
+        selection_threshold=cfg["data_split"]["split_image"]["SELECTION_THRESHOLD"],
     )
-    data_split._split_and_select_patches()
+    data_split.split_and_select_patches()
 
     logging.info("Splitting into train-test-val dir...")
     # Train-test-val split
@@ -57,11 +67,20 @@ def ingest_and_process_data(cfg: DictConfig):
         input_dir=cfg["files"]["INTERIM_DIR"], output_dir=cfg["files"]["SPLIT_DIR"]
     )
 
-    # Remove DL dir
-    logging.info("Removing downloaded data...")
-    shutil.rmtree(cfg["files"]["DL_IMG_DIR"])
-    shutil.rmtree(cfg["files"]["DL_MASK_DIR"])
-    os.remove(os.path.join(cfg["files"]["DATA_DIR"], cfg["files"]["FILE_NAME"]))
+    # Remove DL files
+    logging.info("Removing downloaded and interim data...")
+    # If file or dir is not SPLIT_DIR, remove it
+    for file in os.listdir(cfg["files"]["DATA_DIR"]):
+        file_txt = os.path.join(cfg["files"]["DATA_DIR"], file).replace("/", "")
+        # make SPLIT_DIR into a path
+        split_dir_txt = os.path.join(cfg["files"]["SPLIT_DIR"]).replace("/", "")
+        if (file_txt != split_dir_txt) and (file != ".gitignore"):
+            # join file path to DATA_DIR
+            if os.path.isfile(os.path.join(cfg["files"]["DATA_DIR"], file)):
+                os.remove(os.path.join(cfg["files"]["DATA_DIR"], file))
+            else:
+                shutil.rmtree(os.path.join(cfg["files"]["DATA_DIR"], file))
+    
     logging.info("Data ingestion and processing completed.")
     
 if __name__ == "__main__":
