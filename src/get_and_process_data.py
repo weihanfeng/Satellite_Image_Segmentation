@@ -24,8 +24,9 @@ def ingest_and_process_data(cfg: DictConfig):
         )
         EXTRACT_PATH = os.path.join(os.getcwd(), cfg["files"]["DATA_DIR"])
         DATA_INGESTION = DataIngestion(URL, FILE_PATH, EXTRACT_PATH)
-        logging.info("Start downloading data...")
-        DATA_INGESTION.download_data(cfg["data_ingestion"]["DOWNLOAD_FROM_GDRIVE"])
+        if cfg["data_ingestion"]["DOWNLOAD_FLAG"]:
+            logging.info("Start downloading data...")
+            DATA_INGESTION.download_data(cfg["data_ingestion"]["DOWNLOAD_FROM_GDRIVE"])
         logging.info("Start extracting data...")
         DATA_INGESTION.extract_data()
         logging.info("Moving files from DL dirs to DEST dirs...")
