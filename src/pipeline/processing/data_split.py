@@ -50,6 +50,8 @@ class DataSplit:
                                 os.makedirs(os.path.join(self.output_dir, "images"))
                             if not os.path.exists(os.path.join(self.output_dir, "masks")):
                                 os.makedirs(os.path.join(self.output_dir, "masks"))
+                            # Remap mask labels according to a mapping dict
+                            mask_patches[i,j] = np.vectorize(self.new_label_map.get)(mask_patches[i,j])
                             cv2.imwrite(os.path.join(self.output_dir, "images", file.strip('.tif')+"_patch_"+str(i)+"_"+str(j)+".tif"), image_patches[i,j][0])
                             cv2.imwrite(os.path.join(self.output_dir, "masks", file.strip('.tif')+"_patch_"+str(i)+"_"+str(j)+".tif"), mask_patches[i,j])
 
@@ -92,16 +94,15 @@ class DataSplit:
 
     def _select_patches(self, mask_patch):
         """return true if the patch has significant variation in labels or contains labels to remove"""
-        pixel_counts = np.unique(mask_patch, return_counts=True)[1]
-        pixel_percentage = pixel_counts / pixel_counts.sum()
         if self.labels_to_remove is not None:
             # Find unique labels
             unique_labels = np.unique(mask_patch)
             # Check if unique labels are in labels_to_remove
             if np.isin(unique_labels, self.labels_to_remove).any():
                 return False
-            # Remap mask labels according to a mapping dict
-            mask_patch = np.vectorize(self.new_label_map.get)(mask_patch)
+        # Get percentage
+        pixel_counts = np.unique(mask_patch, return_counts=True)[1]
+        pixel_percentage = pixel_counts / pixel_counts.sum()
         if max(pixel_percentage) < self.threshold:
             return True
         else:
