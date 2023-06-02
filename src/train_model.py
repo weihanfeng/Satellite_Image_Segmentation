@@ -21,6 +21,7 @@ setup_logging()
 
 @hydra.main(config_path="../conf", config_name="config", version_base=None)
 def main(cfg: DictConfig):
+    torch.autograd.set_detect_anomaly(True)
     # create train and validation dataset
     logging.info("Starting model training...")
     logging.info(f"Creating train and validation dataloader...")
