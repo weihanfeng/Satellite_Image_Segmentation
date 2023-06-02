@@ -14,8 +14,8 @@ files:
   TRAIN_IMG_DIR : "data/split/train/"
   VAL_IMG_DIR : "data/split/val/"
   TEST_IMG_DIR : "data/split/test/"
-  MODEL_READ_PATH: "../drive/MyDrive/sis_models/UNetWithResnet50Encoder_unfreeze1.pth"
-  MODEL_SAVE_PATH: "../drive/MyDrive/sis_models/UNetWithResnet50Encoder_unfreeze1.pth"
+  MODEL_READ_PATH: "../drive/MyDrive/sis_models/UNetWithResnet50Encoder_unfreeze2.pth"
+  MODEL_SAVE_PATH: "../drive/MyDrive/sis_models/UNetWithResnet50Encoder_unfreeze2.pth"
 
 data_ingestion:
   FLAG: True
@@ -54,7 +54,7 @@ model:
   OUT_CHANNELS: 7
   FEATURE_NUMS: [64, 128, 256, 512]
   NUM_EPOCHS: 13
-  LAST_N_LAYERS_TO_UNFREEZE: 1 # Unfreeze last n layers of pretrained backbone
+  LAST_N_LAYERS_TO_UNFREEZE: 2 # Unfreeze last n layers of pretrained backbone
   LOAD_MODEL: False
 
   # types: background – 1, building – 2, road – 3,water – 4, barren – 5,forest – 6, agriculture – 7. And the no-data regions were assigned 0
