@@ -44,7 +44,7 @@ data_split:
     RANDOM_STATE: 42
 
 dataloader: 
-  BATCH_SIZE: 32
+  BATCH_SIZE: 16
   NUM_WORKERS: 2
   PIN_MEMORY: False
 
