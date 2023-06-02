@@ -88,7 +88,14 @@ def main(cfg: DictConfig):
         val_loss, val_iou = segmentation_model.train_val_epoch(val_loader, mode="val")
         logging.info(f"Training Loss: {train_loss:.4f} | Training IoU: {train_iou:.4f}")
         logging.info(f"Validation Loss: {val_loss:.4f} | Validation IoU: {val_iou:.4f}")
-
+        # Reduce learning rate if validation loss does not decrease for 3 epochs
+        scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
+            segmentation_model.optimizer,
+            factor=cfg["model"]["REDUCE_LR_FACTOR"],
+            patience=cfg["model"]["REDUCE_LR_PATIENCE"],
+            verbose=True,
+        )
+        scheduler.step(val_loss)
         # save checkpoint if validation loss decreases
         checkpoint = {
             "state_dict": segmentation_model.model.state_dict(),
