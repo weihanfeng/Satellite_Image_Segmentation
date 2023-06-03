@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Predicted mask</title>
+    <style>
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .color-box {
+            width: 20px;
+            height: 20px;
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Predicted mask</h1>
+    <img src="data:image/png;base64,{{ original_image }}" alt="Original Image">
+    <img src="data:image/png;base64,{{ processed_image }}" alt="Processed Image">
+    <p>Area: {{ area }}</p>
+    <div class="legend">
+        <div class="legend-item">
+            <div class="color-box" style="background-color: rgb(128, 128, 128);"></div>
+            Background (Grey)
+        </div>
+        <div class="legend-item">
+            <div class="color-box" style="background-color: rgb(255, 0, 0);"></div>
+            Building (Red)
+        </div>
+        <div class="legend-item">
+            <div class="color-box" style="background-color: rgb(255, 165, 0);"></div>
+            Road (Orange)
+        </div>
+        <div class="legend-item">
+            <div class="color-box" style="background-color: rgb(0, 0, 255);"></div>
+            Water (Blue)
+        </div>
+        <div class="legend-item">
+            <div class="color-box" style="background-color: rgb(255, 255, 127);"></div>
+            Barren (Cream Yellow)
+        </div>
+        <div class="legend-item">
+            <div class="color-box" style="background-color: rgb(0, 128, 0);"></div>
+            Forest (Dark Green)
+        </div>
+        <div class="legend-item">
+            <div class="color-box" style="background-color: rgb(185, 255, 71);"></div>
+            Agriculture (Lime green)
+        </div>
+    </div>
+</body>
+</html>
