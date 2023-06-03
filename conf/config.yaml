@@ -16,6 +16,7 @@ files:
   TEST_IMG_DIR : "data/split/test/"
   MODEL_READ_PATH: "../drive/MyDrive/sis_models/UNetWithResnet50Encoder_unfreeze2_512.pth"
   MODEL_SAVE_PATH: "../drive/MyDrive/sis_models/UNetWithResnet50Encoder_unfreeze2_512.pth"
+  API_MODEL: "../models/UNetWithResnet50Encoder_unfreeze2_512.pth"
 
 data_ingestion:
   FLAG: True
