@@ -29,18 +29,18 @@ def get_mask(image):
     # Get the mask
     mask = predict_image(image=image_array, model=model, patch_size=256)
     # Convert mask to PIL image
-    colormap = [
-        (128, 128, 128), # Background (label 0) - Black
-        (128, 0, 0),     # Building (Label 1) - Dark Red
-        (255, 165, 0), # Road (Label 2) - Gray
-        (0, 0, 255),     # Water (Label 3) - Blue
-        (255, 255, 127),   # Barren (Label 4) - Cream Yellow
-        (0, 128, 0),     # Forest (Label 5) - Dark Green
-        (185, 255, 71)  # Agriculture (Label 6) - Lime Green
-    ]
+    colormap = {
+        0: (128, 128, 128), # Background (label 0) - Black
+        1: (128, 0, 0),     # Building (Label 1) - Dark Red
+        2: (255, 165, 0), # Road (Label 2) - Gray
+        3: (0, 0, 255),     # Water (Label 3) - Blue
+        4: (77, 47, 20),   # Barren (Label 4) - brown
+        5: (0, 88, 0),     # Forest (Label 5) - Dark Green
+        6: (185, 255, 71)  # Agriculture (Label 6) - Lime Green
+    }
     mask = Image.fromarray(mask.astype(np.uint8))
     mask = mask.convert('P')
-    mask.putpalette([c for rgb in colormap for c in rgb])
+    mask.putpalette([c for rgb in tuple(colormap.values()) for c in rgb])
     mask = mask.convert('RGBA')  # Convert to 'RGBA' mode
     mask.putalpha(180)
 
@@ -88,4 +88,6 @@ def upload_image():
     return render_template('upload.html')
 
 if __name__ == '__main__':
+    app.jinja_env.auto_reload = True
+    app.config['TEMPLATES_AUTO_RELOAD'] = True
     app.run(debug=True)
