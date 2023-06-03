@@ -16,7 +16,6 @@ files:
   TEST_IMG_DIR : "data/split/test/"
   MODEL_READ_PATH: "../drive/MyDrive/sis_models/UNetWithResnet50Encoder_unfreeze2_512.pth"
   MODEL_SAVE_PATH: "../drive/MyDrive/sis_models/UNetWithResnet50Encoder_unfreeze2_512.pth"
-  API_MODEL: "../models/UNetWithResnet50Encoder_unfreeze2_512.pth"
 
 data_ingestion:
   FLAG: True
@@ -32,13 +31,13 @@ data_split:
     SELECTION_THRESHOLD: 0.95
     LABELS_TO_REMOVE: [0]
     NEW_LABEL_MAP:
-      1: 0
-      2: 1
-      3: 2
-      4: 3
-      5: 4
-      6: 5
-      7: 6
+      1: 0 # background
+      2: 1 # building
+      3: 2 # road
+      4: 3 # water
+      5: 4 # barren
+      6: 5 # forest
+      7: 6 # agriculture
   train_val_split:
     TRAIN_SIZE: 0.7
     VAL_SIZE: 0.15
@@ -60,4 +59,13 @@ model:
   REDUCE_LR_FACTOR: 0.1
   REDUCE_LR_PATIENCE: 2
 
-  # types: background – 1, building – 2, road – 3,water – 4, barren – 5,forest – 6, agriculture – 7. And the no-data regions were assigned 0
+api:
+  API_MODEL: "../models/UNetWithResnet50Encoder_unfreeze2_512.pth"
+  colormap: 
+    0: [128, 128, 128] # Background (label 0) - Black
+    1: [128, 0, 0]     # Building (Label 1) - Dark Red
+    2: [255, 165, 0] # Road (Label 2) - Gray
+    3: [0, 0, 255]     # Water (Label 3) - Blue
+    4: [77, 47, 20]   # Barren (Label 4) - Cream Yellow
+    5: [0, 88, 0]     # Forest (Label 5) - Dark Green
+    6: [185, 255, 71]  # Agriculture (Label 6) - Light Green
