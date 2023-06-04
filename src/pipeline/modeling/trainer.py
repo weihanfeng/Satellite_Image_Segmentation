@@ -133,7 +133,7 @@ class Trainer:
         else:
             raise ValueError("Mode must be either train or val")
 
-        progress_bar = tqdm(loader, desc="Training epoch")
+        progress_bar = tqdm(loader, desc=f"{mode} epoch")
         total_loss = 0.0
         total_iou = 0.0
         for batch_idx, (data, targets) in enumerate(progress_bar):
