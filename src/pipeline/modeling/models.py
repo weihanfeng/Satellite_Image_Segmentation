@@ -281,16 +281,21 @@ class ImageSegmentationModel(nn.Module):
 
         return iou
     
-    def train_val_epoch(self, loader, mode):
+    def train_epoch(self, loader, mode):
         """A training and validation epoch
         Args:
             loader (DataLoader): DataLoader
-            mode (str): train or validation
+            mode (str): train or val
         Returns:
             train_loss (float): training loss
             train_iou (float): training IoU
         """
-        self.model.train() if mode == "train" else self.model.eval()
+        if mode == "train":
+            self.model.train()
+        elif mode == "val":
+            self.model.eval()
+        else:
+            raise ValueError("mode must be either 'train' or 'val'")
 
         progress_bar = tqdm(loader, desc=mode)
         total_loss = 0.0

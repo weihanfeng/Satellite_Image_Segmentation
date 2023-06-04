@@ -6,6 +6,7 @@ from pipeline.modeling.models import (
     ImageSegmentationModel,
     UNetWithResnet50Encoder,
 )
+from pipeline.modeling.trainer import Trainer
 from pipeline.modeling.dataset import SegmentationDataset, Transform
 from utils.general_utils import setup_logging, save_model, load_model
 from torch.utils.data import DataLoader
@@ -74,23 +75,31 @@ def main(cfg: DictConfig):
     total_epoch = last_epoch + cfg["model"]["NUM_EPOCHS"]
     for epoch in range(last_epoch, total_epoch):
         logging.info(f"Epoch {epoch+1}/{total_epoch}")
-        segmentation_model = ImageSegmentationModel(
+        # segmentation_model = ImageSegmentationModel(
+        #     model=model,
+        #     num_classes=cfg["model"]["OUT_CHANNELS"],
+        #     learning_rate=cfg["model"]["LEARNING_RATE"],
+        #     optimizer=optimizer,
+        #     loss_fn=nn.CrossEntropyLoss(),
+        # )
+        trainer = Trainer(
             model=model,
             num_classes=cfg["model"]["OUT_CHANNELS"],
             learning_rate=cfg["model"]["LEARNING_RATE"],
             optimizer=optimizer,
             loss_fn=nn.CrossEntropyLoss(),
         )
+
         # Get train and validation loss and iou
-        train_loss, train_iou = segmentation_model.train_val_epoch(
-            train_loader, mode="train"
+        train_loss, train_iou = trainer.train_epoch(
+            train_loader
         )
-        val_loss, val_iou = segmentation_model.train_val_epoch(val_loader, mode="val")
+        val_loss, val_iou = trainer.val_epoch(val_loader)
         logging.info(f"Training Loss: {train_loss:.4f} | Training IoU: {train_iou:.4f}")
         logging.info(f"Validation Loss: {val_loss:.4f} | Validation IoU: {val_iou:.4f}")
         # Reduce learning rate if validation loss does not decrease for 3 epochs
         scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
-            segmentation_model.optimizer,
+            trainer.optimizer,
             factor=cfg["model"]["REDUCE_LR_FACTOR"],
             patience=cfg["model"]["REDUCE_LR_PATIENCE"],
             verbose=True,
@@ -98,7 +107,7 @@ def main(cfg: DictConfig):
         scheduler.step(val_loss)
         # save checkpoint if validation loss decreases
         checkpoint = {
-            "state_dict": segmentation_model.model.state_dict(),
+            "state_dict": trainer.model.state_dict(),
             # "optimizer": segmentation_model.optimizer.state_dict(),
             "epoch": epoch,
             "losses": {"train_loss": train_loss, "val_loss": val_loss},
