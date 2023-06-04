@@ -5,13 +5,9 @@ Trainer class for training models
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from modeling.models import (
-    UNet,
-    ImageSegmentationModel,
-    UNetWithResnet50Encoder,
-)
 from tqdm import tqdm
 import torch.nn.functional as F
+from utils.general_utils import setup_logging, save_model, load_model
 
 
 class Trainer():
@@ -22,6 +18,7 @@ class Trainer():
         learning_rate=0.001,
         optimizer=torch.optim.Adam,
         loss_fn=nn.CrossEntropyLoss(),
+        num_epochs=10,
     ):
         super().__init__()
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -31,6 +28,7 @@ class Trainer():
         self.num_classes = num_classes
         self.optimizer = optimizer(self.model.parameters(), lr=self.learning_rate)
         self.scaler = torch.cuda.amp.GradScaler()
+        self.num_epochs = num_epochs
 
     def _get_prediction_result(self, pred, target):
         """Get prediction result
@@ -63,7 +61,7 @@ class Trainer():
 
         return iou
     
-    def train_epoch(self, loader):
+    def train_batch(self, loader):
         """A training and validation epoch
         Args:
             loader (DataLoader): DataLoader
@@ -106,7 +104,7 @@ class Trainer():
 
         return epoch_loss, epoch_iou
     
-    def val_epoch(self, loader):
+    def val_batch(self, loader):
         """A validation epoch"""
         self.model.eval()
 
@@ -138,3 +136,10 @@ class Trainer():
         epoch_iou = total_iou/len(loader)
 
         return epoch_loss, epoch_iou
+    
+    def train(self, loader):
+        """Run training and validation epochs"""
+        for epoch in range(self.num_epochs):
+            train_loss, train_iou = self.train_batch(loader)
+            val_loss, val_iou = self.val_batch(loader)
+
