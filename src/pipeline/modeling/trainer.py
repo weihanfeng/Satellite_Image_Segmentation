@@ -68,7 +68,7 @@ class Trainer:
 
         return iou
 
-    def train_single_epoch(self, loader):
+    def _train_single_epoch(self, loader):
         """A training and validation epoch
         Args:
             loader (DataLoader): DataLoader
@@ -114,7 +114,7 @@ class Trainer:
 
         return epoch_loss, epoch_iou
 
-    def val_single_epoch(self, loader):
+    def _val_single_epoch(self, loader):
         """A validation epoch"""
         self.model.eval()
 
@@ -162,11 +162,14 @@ class Trainer:
         total_epoch = last_epoch + self.num_epochs
         for epoch in range(last_epoch, total_epoch):
             logging.info(f"Epoch {epoch+1}/{total_epoch}")
-            # log learning rate
             for param_group in self.optimizer.param_groups:
                 logging.info(f"Learning rate: {param_group['lr']}")
-            train_loss, train_iou = self.train_batch(train_loader)
-            val_loss, val_iou = self.val_batch(val_loader)
+            
+            # Run training and validation epoch
+            train_loss, train_iou = self._train_single_epoch(train_loader)
+            val_loss, val_iou = self._val_single_epoch(val_loader)
+
+            # Reduce learning rate if validation loss does not improve
             reduce_lr_scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
                 self.optimizer,
                 factor=reduce_lr_factor,
@@ -174,14 +177,18 @@ class Trainer:
                 verbose=True,
             )
             reduce_lr_scheduler.step(val_loss)
-        checkpoint = {
-            "state_dict": self.model.state_dict(),
-            # "optimizer": segmentation_model.optimizer.state_dict(),
-            "epoch": epoch,
-            "losses": {"train_loss": train_loss, "val_loss": val_loss},
-            "iou": {"train_iou": train_iou, "val_iou": val_iou},
-        }
-        if val_loss < best_loss:
-            best_loss = val_loss
-            save_model(checkpoint, self.model_save_path)
-            logging.info("Model saved")
+
+            # Save model checkpoint if validation loss is lower than best loss
+            if val_loss < best_loss:
+                best_loss = val_loss
+                checkpoint = {
+                "state_dict": self.model.state_dict(),
+                # "optimizer": segmentation_model.optimizer.state_dict(),
+                "epoch": epoch,
+                "losses": {"train_loss": train_loss, "val_loss": val_loss},
+                "iou": {"train_iou": train_iou, "val_iou": val_iou},
+                }
+                save_model(checkpoint, self.model_save_path)
+                logging.info("Model saved")
+
+            logging.info("---------------------------------------")
