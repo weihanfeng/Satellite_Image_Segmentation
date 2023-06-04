@@ -1,93 +1,142 @@
 from flask import Flask, render_template, request, redirect
 from PIL import Image
 import io
-import os
 import base64
 import numpy as np
-from utils.general_utils import load_model, predict_image
+import logging
+from utils.general_utils import load_model, predict_image, setup_logging
 from pipeline.modeling.models import (
     UNet,
-    ImageSegmentationModel,
     UNetWithResnet50Encoder,
 )
+# import rasterio
+# from rasterio.io import MemoryFile
+from hydra import compose, initialize
+
+setup_logging()
 
 app = Flask(__name__)
 
-# Function to process the image
-def get_mask(image):
-    """Get the mask of the image"""
+@app.route("/", methods=["GET", "POST"])
+def upload_image():
+    if request.method == "POST":
+        # Hydra config
+        with initialize(version_base=None, config_path="../conf"):
+            cfg = compose(config_name="config")
+
+        # Check if the POST request has the file part
+        if "image" not in request.files:
+            return redirect(request.url)
+        file = request.files["image"]
+
+        # Check if the user submitted an empty form
+        if file.filename == "":
+            return redirect(request.url)
+
+        # Read the image file
+        image = Image.open(file).convert("RGB")
+
+        # Get image mask prediction
+        logging.info(f"Predicting mask for image: {file.filename}")
+        mask = get_mask(image, file, cfg)
+
+        # Overlay the mask on the original image
+        overlayed_image = Image.alpha_composite(image.convert("RGBA"), mask)
+
+        # Create an in-memory file to save the original and processed image
+        encoded_mask = save_in_memory(overlayed_image, format="PNG")
+        encoded_image = save_in_memory(image, format="PNG")
+
+        # area = "placeholder"
+
+        return render_template(
+            "result.html",
+            original_image=encoded_image,
+            processed_image=encoded_mask,
+            # area=area,
+        )
+
+    return render_template("upload.html")
+
+
+def get_mask(image, file, cfg):
+    """Get the mask of the image and its area
+    
+    Args:
+        image (PIL.Image): image
+        cfg (DictConfig): hydra config
+
+    Returns:
+        PIL.Image: mask in RGBA format
+    """
     # Load the model
     model = UNetWithResnet50Encoder(
         last_n_layers_to_unfreeze=2,
         n_classes=7,
     )
-    checkpoint = load_model("models/UNetWithResnet50Encoder_unfreeze2.pth", cpu=True)
+    checkpoint = load_model(cfg["api"]["API_MODEL"], cpu=cfg["api"]["CPU"])
     model.load_state_dict(checkpoint["state_dict"])
     model.eval()
+
     # Convert image to numpy
     image_array = np.array(image)
-    # Get the mask
-    mask = predict_image(image=image_array, model=model, patch_size=256)
-    # Convert mask to PIL image
-    colormap = {
-        0: (128, 128, 128), # Background (label 0) - Black
-        1: (128, 0, 0),     # Building (Label 1) - Dark Red
-        2: (255, 165, 0), # Road (Label 2) - Gray
-        3: (0, 0, 255),     # Water (Label 3) - Blue
-        4: (77, 47, 20),   # Barren (Label 4) - brown
-        5: (0, 88, 0),     # Forest (Label 5) - Dark Green
-        6: (185, 255, 71)  # Agriculture (Label 6) - Lime Green
-    }
+
+    # Get the mask and set alpha channel
+    mask = predict_image(
+        image=image_array, model=model, patch_size=cfg["api"]["PATCH_SIZE"]
+    )
+
+    # # If file is of type '.tif', calculate the area of the mask
+    # if file.filename.endswith(".tif"):
+    #     area_map = calculate_area(mask=mask, file=file, area_map=cfg["api"]["AREA_MAP"])
+    #     logging.info(area_map)
+        
+    colormap = cfg["api"]["COLORMAP"]
     mask = Image.fromarray(mask.astype(np.uint8))
-    mask = mask.convert('P')
+    mask = mask.convert("P")
     mask.putpalette([c for rgb in tuple(colormap.values()) for c in rgb])
-    mask = mask.convert('RGBA')  # Convert to 'RGBA' mode
-    mask.putalpha(180)
+    mask = mask.convert("RGBA")  # Convert to 'RGBA' mode
+    mask.putalpha(cfg["api"]["ALPHA_VALUE"])
 
     return mask
 
-@app.route('/', methods=['GET', 'POST'])
-def upload_image():
-    if request.method == 'POST':
-        # Check if the POST request has the file part
-        if 'image' not in request.files:
-            return redirect(request.url)
-        file = request.files['image']
+def save_in_memory(file_to_save, format="PNG"):
+    """Save file in memory
+    
+    Args:
+        file (str): file name
 
-        # Check if the user submitted an empty form
-        if file.filename == '':
-            return redirect(request.url)
+    Returns:
+        str: file in memory
+    """
+    tmp_file = io.BytesIO()
+    file_to_save.save(tmp_file, format=format)
+    tmp_file.seek(0)
+    encoded_file = base64.b64encode(tmp_file.getvalue()).decode("utf-8")
 
-        # Read the image file
-        image = Image.open(file).convert('RGB')
+    return encoded_file
 
-        # Get image mask prediction
-        mask = get_mask(image)
+# def calculate_area(
+#     mask,
+#     file,
+#     area_map,
+# ):
+#     """Calculate the area of the mask if the file is of type '.tif'
+    
+#     Args:
+#         mask (np.array): mask
+#         file (str): file name
+#         area_map (dict): area map
 
-        # Overlay the mask on the original image
-        overlayed_image = Image.alpha_composite(image.convert('RGBA'), mask)
+#     Returns:
+#         str: area
+#     """
+#     with MemoryFile(file) as memfile:
+#         with memfile.open() as dataset:
 
-        # Create an in-memory file to save the original and processed image
-        # mask
-        processed_file = io.BytesIO()
-        overlayed_image.save(processed_file, format='PNG')
-        processed_file.seek(0)
-        # image
-        original_file = io.BytesIO()
-        image.save(original_file, format='PNG')
-        original_file.seek(0)
+#          return type(dataset)
 
-        # Encode the original and processed image as base64
-        encoded_image = base64.b64encode(original_file.getvalue()).decode('utf-8')
-        encoded_mask = base64.b64encode(processed_file.getvalue()).decode('utf-8')
-
-        area = "placeholder"
-
-        return render_template('result.html', original_image=encoded_image, processed_image=encoded_mask, area=area)
-
-    return render_template('upload.html')
-
-if __name__ == '__main__':
-    app.jinja_env.auto_reload = True
-    app.config['TEMPLATES_AUTO_RELOAD'] = True
-    app.run(debug=True)
+if __name__ == "__main__":
+    # app.jinja_env.auto_reload = True
+    # app.config["TEMPLATES_AUTO_RELOAD"] = True
+    app.run(debug=True, host='0.0.0.0')
