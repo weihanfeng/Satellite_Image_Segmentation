@@ -68,6 +68,8 @@ def main(cfg: DictConfig):
         last_epoch = model_artifact["epoch"]
         best_loss = model_artifact["losses"]["val_loss"]
         # optimizer.load_state_dict(model_artifact["optimizer"])
+    else:
+        best_loss = float("inf")
 
     # train model
     logging.info(f"Model architecture: {model.__class__.__name__}")
