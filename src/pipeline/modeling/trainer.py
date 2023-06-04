@@ -62,7 +62,7 @@ class Trainer:
 
             # Run training and validation epoch
             train_loss, train_iou = self._run_single_epoch(train_loader, mode="train")
-            val_loss, val_iou = self._val_single_epoch(val_loader, mode="val")
+            val_loss, val_iou = self._run_single_epoch(val_loader, mode="val")
 
             # Reduce learning rate if validation loss does not improve
             reduce_lr_scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
