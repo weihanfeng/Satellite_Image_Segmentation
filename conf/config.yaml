@@ -55,8 +55,8 @@ model:
   FEATURE_NUMS: [64, 128, 256, 512]
   NUM_EPOCHS: 13
   LAST_N_LAYERS_TO_UNFREEZE: 2 # Unfreeze last n layers of pretrained backbone
-  LOAD_MODEL: False
-  REDUCE_LR_FACTOR: 0.1
+  LOAD_MODEL: True
+  REDUCE_LR_FACTOR: 0.05
   REDUCE_LR_PATIENCE: 1
 
 api:
