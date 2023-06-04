@@ -5,8 +5,8 @@ WORKDIR /app
 
 # Install any needed packages specified in requirements.txt
 RUN apt-get update && apt-get install ffmpeg libsm6 libxext6  -y
-COPY requirements.txt .
-RUN pip3 install -r requirements.txt
+COPY requirements_cpu.txt .
+RUN pip3 install -r requirements_cpu.txt
 
 # Copy the required files into the container at /app
 COPY src/ ./src

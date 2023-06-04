@@ -21,7 +21,7 @@ data_ingestion:
   FLAG: True
   DOWNLOAD_FLAG: True
   DOWNLOAD_FROM_GDRIVE: True
-  # Gdrive id "1xbnKVN5aRMlpxISXgutzQO0hPT_b4lMi" or "https://zenodo.org/record/5706578/files/Train.zip?download=1"
+  # Gdrive ID: "1xbnKVN5aRMlpxISXgutzQO0hPT_b4lMi" or "https://zenodo.org/record/5706578/files/Train.zip?download=1"
   # Or https://landcover.ai.linuxpolska.com/download/landcover.ai.v1.zip for another dataset
   URL: "1EyfuxY9Dkb_l4bZfRcHeKZwD3NMX2xwc"
 
@@ -60,8 +60,8 @@ model:
   REDUCE_LR_PATIENCE: 1
 
 api:
-  API_MODEL: "../models/UNetWithResnet50Encoder_unfreeze2_512.pth"
-  colormap: 
+  API_MODEL: "models/UNetWithResnet50Encoder_unfreeze2_512.pth"
+  COLORMAP: 
     0: [128, 128, 128] # Background (label 0) - Black
     1: [128, 0, 0]     # Building (Label 1) - Dark Red
     2: [255, 165, 0] # Road (Label 2) - Gray
@@ -69,3 +69,14 @@ api:
     4: [77, 47, 20]   # Barren (Label 4) - Cream Yellow
     5: [0, 88, 0]     # Forest (Label 5) - Dark Green
     6: [185, 255, 71]  # Agriculture (Label 6) - Light Green
+  AREA_MAP: 
+    0: "Background"
+    1: "Building"
+    2: "Road"
+    3: "Water"
+    4: "Barren"
+    5: "Forest"
+    6: "Agriculture"
+  ALPHA_VALUE: 180 # 0-255
+  PATCH_SIZE: 512
+  CPU: True # Set to False to use GPU
