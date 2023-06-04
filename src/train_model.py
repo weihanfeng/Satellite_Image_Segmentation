@@ -91,8 +91,7 @@ def main(cfg: DictConfig):
         reduce_lr_patience=cfg["model"]["REDUCE_LR_PATIENCE"],
         best_loss=best_loss,
     )
-    logging.info("---------------------------------------")
-
+    logging.info("Training completed")
 
 if __name__ == "__main__":
     main()
