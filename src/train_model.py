@@ -50,7 +50,7 @@ def main(cfg: DictConfig):
         shuffle=False,
     )
 
-    # Load model a
+    # Load model
     # model = UNet(
     #     in_channels=cfg["model"]["IN_CHANNELS"],
     #     out_channels=cfg["model"]["OUT_CHANNELS"],
@@ -91,10 +91,10 @@ def main(cfg: DictConfig):
         )
 
         # Get train and validation loss and iou
-        train_loss, train_iou = trainer.train_epoch(
+        train_loss, train_iou = trainer.train_single_epoch(
             train_loader
         )
-        val_loss, val_iou = trainer.val_epoch(val_loader)
+        val_loss, val_iou = trainer.val_single_epoch(val_loader)
         logging.info(f"Training Loss: {train_loss:.4f} | Training IoU: {train_iou:.4f}")
         logging.info(f"Validation Loss: {val_loss:.4f} | Validation IoU: {val_iou:.4f}")
         # Reduce learning rate if validation loss does not decrease for 3 epochs

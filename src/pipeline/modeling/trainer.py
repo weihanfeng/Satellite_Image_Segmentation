@@ -61,7 +61,7 @@ class Trainer():
 
         return iou
     
-    def train_batch(self, loader):
+    def train_single_epoch(self, loader):
         """A training and validation epoch
         Args:
             loader (DataLoader): DataLoader
@@ -104,7 +104,7 @@ class Trainer():
 
         return epoch_loss, epoch_iou
     
-    def val_batch(self, loader):
+    def val_single_epoch(self, loader):
         """A validation epoch"""
         self.model.eval()
 
