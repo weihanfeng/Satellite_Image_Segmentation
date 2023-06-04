@@ -12,10 +12,12 @@ import logging
 
 setup_logging()
 
-class Trainer():
+
+class Trainer:
     def __init__(
         self,
         model,
+        model_save_path,
         num_classes=5,
         learning_rate=0.001,
         optimizer=torch.optim.Adam,
@@ -25,6 +27,7 @@ class Trainer():
         super().__init__()
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.model = model.to(self.device)
+        self.model_save_path = model_save_path
         self.learning_rate = learning_rate
         self.loss_fn = loss_fn
         self.num_classes = num_classes
@@ -44,7 +47,9 @@ class Trainer():
         """
         loss = self.loss_fn(pred, target)
         pred_labels = torch.argmax(pred, dim=1)
-        pred_labels = F.one_hot(pred_labels, num_classes=self.num_classes).permute(0, 3, 1, 2)
+        pred_labels = F.one_hot(pred_labels, num_classes=self.num_classes).permute(
+            0, 3, 1, 2
+        )
         iou = self._compute_iou(pred_labels, target)
 
         return loss, iou, pred_labels
@@ -62,7 +67,7 @@ class Trainer():
         iou = torch.sum(intersection) / torch.sum(union)
 
         return iou
-    
+
     def train_single_epoch(self, loader):
         """A training and validation epoch
         Args:
@@ -77,35 +82,38 @@ class Trainer():
         total_loss = 0.0
         total_iou = 0.0
         for batch_idx, (data, targets) in enumerate(progress_bar):
-            
             # Perform forward pass and update model
-            with torch.cuda.amp.autocast(): # cast tensors to a smaller memory footprint
+            with torch.cuda.amp.autocast():  # cast tensors to a smaller memory footprint
                 data = data.to(device=self.device)
-                targets = F.one_hot(targets, num_classes=self.num_classes).permute(0, 3, 1, 2)
+                targets = F.one_hot(targets, num_classes=self.num_classes).permute(
+                    0, 3, 1, 2
+                )
                 targets = targets.float().to(device=self.device)
                 self.optimizer.zero_grad()
                 predictions = self.model(data)
                 loss, iou, _ = self._get_prediction_result(predictions, targets)
-                self.scaler.scale(loss).backward() # scale loss to prevent underflow when using low precision floats
+                self.scaler.scale(
+                    loss
+                ).backward()  # scale loss to prevent underflow when using low precision floats
                 self.scaler.step(self.optimizer)
                 self.scaler.update()
                 self.optimizer.step()
-            
+
             # get result for current batch
             total_iou += iou.item()
             total_loss += loss.item()
-            ongoing_iou = total_iou/(batch_idx+1)
-            ongoing_loss = total_loss/(batch_idx+1)
+            ongoing_iou = total_iou / (batch_idx + 1)
+            ongoing_loss = total_loss / (batch_idx + 1)
 
             # update tqdm progress bar
             progress_bar.set_postfix({"loss": ongoing_loss, "IoU": ongoing_iou})
             progress_bar.update()
 
-        epoch_loss = total_loss/len(loader)
-        epoch_iou = total_iou/len(loader)
+        epoch_loss = total_loss / len(loader)
+        epoch_iou = total_iou / len(loader)
 
         return epoch_loss, epoch_iou
-    
+
     def val_single_epoch(self, loader):
         """A validation epoch"""
         self.model.eval()
@@ -119,7 +127,9 @@ class Trainer():
                 with torch.cuda.amp.autocast():
                     with torch.no_grad():
                         data = data.to(device=self.device)
-                        targets = F.one_hot(targets, num_classes=self.num_classes).permute(0, 3, 1, 2)
+                        targets = F.one_hot(
+                            targets, num_classes=self.num_classes
+                        ).permute(0, 3, 1, 2)
                         targets = targets.float().to(device=self.device)
                         predictions = self.model(data)
                         loss, iou, _ = self._get_prediction_result(predictions, targets)
@@ -127,24 +137,51 @@ class Trainer():
                 # get result for current batch
                 total_iou += iou.item()
                 total_loss += loss.item()
-                ongoing_iou = total_iou/(batch_idx+1)
-                ongoing_loss = total_loss/(batch_idx+1)
+                ongoing_iou = total_iou / (batch_idx + 1)
+                ongoing_loss = total_loss / (batch_idx + 1)
 
                 # update tqdm progress bar
                 progress_bar.set_postfix({"loss": ongoing_loss, "IoU": ongoing_iou})
                 progress_bar.update()
 
-        epoch_loss = total_loss/len(loader)
-        epoch_iou = total_iou/len(loader)
+        epoch_loss = total_loss / len(loader)
+        epoch_iou = total_iou / len(loader)
 
         return epoch_loss, epoch_iou
-    
-    def train(self, loader):
-        """Run training and validation epochs"""
-        for epoch in range(self.num_epochs):
-            
-            train_loss, train_iou = self.train_batch(loader)
-            val_loss, val_iou = self.val_batch(loader)
-            logging.info(f"Training Loss: {train_loss:.4f} | Training IoU: {train_iou:.4f}")
-            logging.info(f"Validation Loss: {val_loss:.4f} | Validation IoU: {val_iou:.4f}")
 
+    def train(
+        self,
+        train_loader,
+        val_loader,
+        last_epoch=0,
+        reduce_lr_factor=0.1,
+        reduce_lr_patience=2,
+        best_loss=float("inf"),
+    ):
+        """Run training and validation epochs"""
+        total_epoch = last_epoch + self.num_epochs
+        for epoch in range(last_epoch, total_epoch):
+            logging.info(f"Epoch {epoch+1}/{total_epoch}")
+            # log learning rate
+            for param_group in self.optimizer.param_groups:
+                logging.info(f"Learning rate: {param_group['lr']}")
+            train_loss, train_iou = self.train_batch(train_loader)
+            val_loss, val_iou = self.val_batch(val_loader)
+            reduce_lr_scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
+                self.optimizer,
+                factor=reduce_lr_factor,
+                patience=reduce_lr_patience,
+                verbose=True,
+            )
+            reduce_lr_scheduler.step(val_loss)
+        checkpoint = {
+            "state_dict": self.model.state_dict(),
+            # "optimizer": segmentation_model.optimizer.state_dict(),
+            "epoch": epoch,
+            "losses": {"train_loss": train_loss, "val_loss": val_loss},
+            "iou": {"train_iou": train_iou, "val_iou": val_iou},
+        }
+        if val_loss < best_loss:
+            best_loss = val_loss
+            save_model(checkpoint, self.model_save_path)
+            logging.info("Model saved")

@@ -66,57 +66,30 @@ def main(cfg: DictConfig):
         model_artifact = load_model(cfg["files"]["MODEL_READ_PATH"])
         model.load_state_dict(model_artifact["state_dict"])
         last_epoch = model_artifact["epoch"]
+        best_loss = model_artifact["losses"]["val_loss"]
         # optimizer.load_state_dict(model_artifact["optimizer"])
 
     # train model
     logging.info(f"Model architecture: {model.__class__.__name__}")
     logging.info("Start training...")
-    best_loss = float("inf")
-    total_epoch = last_epoch + cfg["model"]["NUM_EPOCHS"]
-    for epoch in range(last_epoch, total_epoch):
-        logging.info(f"Epoch {epoch+1}/{total_epoch}")
-        # segmentation_model = ImageSegmentationModel(
-        #     model=model,
-        #     num_classes=cfg["model"]["OUT_CHANNELS"],
-        #     learning_rate=cfg["model"]["LEARNING_RATE"],
-        #     optimizer=optimizer,
-        #     loss_fn=nn.CrossEntropyLoss(),
-        # )
-        trainer = Trainer(
-            model=model,
-            num_classes=cfg["model"]["OUT_CHANNELS"],
-            learning_rate=cfg["model"]["LEARNING_RATE"],
-            optimizer=optimizer,
-            loss_fn=nn.CrossEntropyLoss(),
-        )
-
-        # Get train and validation loss and iou
-        train_loss, train_iou = trainer.train_single_epoch(
-            train_loader
-        )
-        val_loss, val_iou = trainer.val_single_epoch(val_loader)
-        logging.info(f"Training Loss: {train_loss:.4f} | Training IoU: {train_iou:.4f}")
-        logging.info(f"Validation Loss: {val_loss:.4f} | Validation IoU: {val_iou:.4f}")
-        # Reduce learning rate if validation loss does not decrease for 3 epochs
-        scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
-            trainer.optimizer,
-            factor=cfg["model"]["REDUCE_LR_FACTOR"],
-            patience=cfg["model"]["REDUCE_LR_PATIENCE"],
-            verbose=True,
-        )
-        scheduler.step(val_loss)
-        # save checkpoint if validation loss decreases
-        checkpoint = {
-            "state_dict": trainer.model.state_dict(),
-            # "optimizer": segmentation_model.optimizer.state_dict(),
-            "epoch": epoch,
-            "losses": {"train_loss": train_loss, "val_loss": val_loss},
-            "iou": {"train_iou": train_iou, "val_iou": val_iou},
-        }
-        if val_loss < best_loss:
-            best_loss = val_loss
-            save_model(checkpoint, cfg["files"]["MODEL_SAVE_PATH"])
-        logging.info("---------------------------------------")
+    trainer = Trainer(
+        model=model,
+        model_save_path=cfg["files"]["MODEL_SAVE_PATH"],
+        num_classes=cfg["model"]["OUT_CHANNELS"],
+        learning_rate=cfg["model"]["LEARNING_RATE"],
+        loss_fn=nn.CrossEntropyLoss(),
+        optimizer=optimizer,
+        num_epochs=cfg["model"]["NUM_EPOCHS"],
+    )
+    trainer.train(
+        train_loader=train_loader,
+        val_loader=val_loader,
+        last_epoch=last_epoch,
+        reduce_lr_factor=cfg["model"]["REDUCE_LR_FACTOR"],
+        reduce_lr_patience=cfg["model"]["REDUCE_LR_PATIENCE"],
+        best_loss=best_loss,
+    )
+    logging.info("---------------------------------------")
 
 
 if __name__ == "__main__":

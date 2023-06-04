@@ -57,7 +57,7 @@ model:
   LAST_N_LAYERS_TO_UNFREEZE: 2 # Unfreeze last n layers of pretrained backbone
   LOAD_MODEL: False
   REDUCE_LR_FACTOR: 0.1
-  REDUCE_LR_PATIENCE: 2
+  REDUCE_LR_PATIENCE: 1
 
 api:
   API_MODEL: "../models/UNetWithResnet50Encoder_unfreeze2_512.pth"
