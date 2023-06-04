@@ -8,7 +8,9 @@ import torch.optim as optim
 from tqdm import tqdm
 import torch.nn.functional as F
 from utils.general_utils import setup_logging, save_model, load_model
+import logging
 
+setup_logging()
 
 class Trainer():
     def __init__(
@@ -140,6 +142,9 @@ class Trainer():
     def train(self, loader):
         """Run training and validation epochs"""
         for epoch in range(self.num_epochs):
+            
             train_loss, train_iou = self.train_batch(loader)
             val_loss, val_iou = self.val_batch(loader)
+            logging.info(f"Training Loss: {train_loss:.4f} | Training IoU: {train_iou:.4f}")
+            logging.info(f"Validation Loss: {val_loss:.4f} | Validation IoU: {val_iou:.4f}")
 
