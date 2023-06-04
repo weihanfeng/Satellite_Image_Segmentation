@@ -197,13 +197,14 @@ class Trainer:
             iou (torch.Tensor): batch validation IoU
         """
         with torch.cuda.amp.autocast():
-            data = data.to(device=self.device)
-            targets = F.one_hot(targets, num_classes=self.num_classes).permute(
-                0, 3, 1, 2
-            )
-            targets = targets.float().to(device=self.device)
-            predictions = self.model(data)
-            loss, iou, _ = self._get_prediction_result(predictions, targets)
+            with torch.no_grad():
+                data = data.to(device=self.device)
+                targets = F.one_hot(targets, num_classes=self.num_classes).permute(
+                    0, 3, 1, 2
+                )
+                targets = targets.float().to(device=self.device)
+                predictions = self.model(data)
+                loss, iou, _ = self._get_prediction_result(predictions, targets)
 
         return loss, iou
 
