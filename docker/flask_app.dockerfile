@@ -10,8 +10,10 @@ RUN pip3 install -r requirements_cpu.txt
 
 # Copy the required files into the container at /app
 COPY src/ ./src
-COPY models/UNetWithResnet50Encoder_unfreeze2_512.pth ./models/UNetWithResnet50Encoder_unfreeze2_512.pth
 COPY conf ./conf
+
+# Create a dir named models to store the models
+RUN mkdir models
 
 EXPOSE 5000
 
