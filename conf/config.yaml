@@ -60,7 +60,9 @@ model:
   REDUCE_LR_PATIENCE: 1
 
 api:
-  API_MODEL: "models/UNetWithResnet50Encoder_unfreeze2_512.pth"
+  MODEL_PATH: "models/UNetWithResnet50Encoder_unfreeze2_512.pth"
+  MODEL_SOURCE: "gdrive" # "local" or "gdrive"
+  GDRIVE_ID: "1Ktr0jaCcYe5wMwvHWPlroJBAoCTKQ5zl"
   COLORMAP: 
     0: [128, 128, 128] # Background (label 0) - Black
     1: [128, 0, 0]     # Building (Label 1) - Dark Red
