@@ -9,6 +9,7 @@ from patchify import patchify, unpatchify
 import numpy as np
 import torch.nn.functional as F
 import torchvision.transforms as T
+import gdown
 
 
 logger = logging.Logger(__name__)
@@ -44,12 +45,27 @@ def get_num_files(path):
 
 def save_model(checkpoint, model_dir):
     """Save model checkpoint"""
-    logging.info("Saving model checkpoint")
+    # save to local
+    logging.info("Saving model checkpoint to local directory")
     torch.save(checkpoint, model_dir)
+    
 
-def load_model(model_dir, cpu=False):
+def load_model(model_dir, cpu=False, source="local", gdrive_id=None):
     """Load model checkpoint"""
     logging.info("Loading model checkpoint")
+    if source == "gdrive":
+        # download model from gdrive
+        logging.info("Downloading model from Google Drive")
+        if gdrive_id is None:
+            logging.error("Google Drive ID not provided")
+            raise ValueError("Google Drive ID not provided")
+        else:
+            # download model from gdrive into model_dir
+            gdown.download(output=model_dir, quiet=False, id = gdrive_id)
+    elif source == "local":
+        if not os.path.exists(model_dir):
+            logging.error("Model checkpoint does not exist")
+            raise ValueError("Model checkpoint does not exist")
     if cpu:
         model = torch.load(model_dir, map_location=torch.device("cpu"))
     else:

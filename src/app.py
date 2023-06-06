@@ -9,13 +9,16 @@ from pipeline.modeling.models import (
     UNet,
     UNetWithResnet50Encoder,
 )
+
 # import rasterio
 # from rasterio.io import MemoryFile
 from hydra import compose, initialize
+import os
 
 setup_logging()
 
 app = Flask(__name__)
+
 
 @app.route("/", methods=["GET", "POST"])
 def upload_image():
@@ -23,6 +26,30 @@ def upload_image():
         # Hydra config
         with initialize(version_base=None, config_path="../conf"):
             cfg = compose(config_name="config")
+            
+        # Load the model
+        model = UNetWithResnet50Encoder(
+            last_n_layers_to_unfreeze=2,
+            n_classes=7,
+        )
+        # Check if model checkpoint exists
+        if os.path.exists(cfg["api"]["MODEL_PATH"]):
+            logging.info("Loading model from local")
+            checkpoint = load_model(
+                model_dir=cfg["api"]["MODEL_PATH"],
+                cpu=cfg["api"]["CPU"],
+                source="local",
+            )
+        else:
+            logging.info(f"Loading model from {cfg['api']['MODEL_SOURCE']}")
+            checkpoint = load_model(
+                model_dir=cfg["api"]["MODEL_PATH"], 
+                cpu=cfg["api"]["CPU"],
+                source=cfg["api"]["MODEL_SOURCE"],
+                gdrive_id=cfg["api"]["GDRIVE_ID"],
+                )
+        model.load_state_dict(checkpoint["state_dict"])
+        model.eval()
 
         # Check if the POST request has the file part
         if "image" not in request.files:
@@ -38,7 +65,12 @@ def upload_image():
 
         # Get image mask prediction
         logging.info(f"Predicting mask for image: {file.filename}")
-        mask = get_mask(image, file, cfg)
+        mask = get_mask(
+            image=image, 
+            model=model,
+            file=file, 
+            cfg=cfg,
+            )
 
         # Overlay the mask on the original image
         overlayed_image = Image.alpha_composite(image.convert("RGBA"), mask)
@@ -59,9 +91,9 @@ def upload_image():
     return render_template("upload.html")
 
 
-def get_mask(image, file, cfg):
+def get_mask(image, model, file, cfg):
     """Get the mask of the image and its area
-    
+
     Args:
         image (PIL.Image): image
         cfg (DictConfig): hydra config
@@ -69,15 +101,6 @@ def get_mask(image, file, cfg):
     Returns:
         PIL.Image: mask in RGBA format
     """
-    # Load the model
-    model = UNetWithResnet50Encoder(
-        last_n_layers_to_unfreeze=2,
-        n_classes=7,
-    )
-    checkpoint = load_model(cfg["api"]["API_MODEL"], cpu=cfg["api"]["CPU"])
-    model.load_state_dict(checkpoint["state_dict"])
-    model.eval()
-
     # Convert image to numpy
     image_array = np.array(image)
 
@@ -90,7 +113,7 @@ def get_mask(image, file, cfg):
     # if file.filename.endswith(".tif"):
     #     area_map = calculate_area(mask=mask, file=file, area_map=cfg["api"]["AREA_MAP"])
     #     logging.info(area_map)
-        
+
     colormap = cfg["api"]["COLORMAP"]
     mask = Image.fromarray(mask.astype(np.uint8))
     mask = mask.convert("P")
@@ -100,9 +123,10 @@ def get_mask(image, file, cfg):
 
     return mask
 
+
 def save_in_memory(file_to_save, format="PNG"):
     """Save file in memory
-    
+
     Args:
         file (str): file name
 
@@ -116,13 +140,14 @@ def save_in_memory(file_to_save, format="PNG"):
 
     return encoded_file
 
+
 # def calculate_area(
 #     mask,
 #     file,
 #     area_map,
 # ):
 #     """Calculate the area of the mask if the file is of type '.tif'
-    
+
 #     Args:
 #         mask (np.array): mask
 #         file (str): file name
@@ -139,4 +164,4 @@ def save_in_memory(file_to_save, format="PNG"):
 if __name__ == "__main__":
     # app.jinja_env.auto_reload = True
     # app.config["TEMPLATES_AUTO_RELOAD"] = True
-    app.run(debug=True, host='0.0.0.0')
+    app.run(debug=True, host="0.0.0.0")
