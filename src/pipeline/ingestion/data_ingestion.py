@@ -6,7 +6,6 @@ import zipfile
 import requests
 from tqdm import tqdm
 import gdown
-import shutil
 
 class DataIngestion:
     def __init__(self, url, file_path, extract_path):
