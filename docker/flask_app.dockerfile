@@ -8,10 +8,11 @@ ARG REQUIREMENTS_TXT="requirements_cpu.txt"
 RUN groupadd -g $ID $USER && useradd -g $ID -m -u $ID -s /bin/bash $USER
 # Set the working directory to /app
 WORKDIR $HOME_DIR
+RUN apt-get update && apt-get install ffmpeg libsm6 libxext6  -y
+
 USER $USER
 
 # Install any needed packages specified in requirements.txt
-RUN apt-get update && apt-get install ffmpeg libsm6 libxext6  -y
 COPY --chown=$ID:$ID REQUIREMENTS_TXT .
 RUN pip3 install -r REQUIREMENTS_TXT
 
