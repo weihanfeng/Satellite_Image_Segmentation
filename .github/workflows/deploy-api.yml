@@ -16,6 +16,18 @@ jobs:
       - run: docker tag sat_img_seg ${{ secrets.DOCKER_USERNAME }}/sat_img_seg:latest
       - run: docker push ${{ secrets.DOCKER_USERNAME }}/sat_img_seg:latest
       - run: echo "Docker Image published to Docker Hub"
+      - name: Deploy to AWS
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.AWS_HOST }}
+          username: ${{ secrets.AWS_USERNAME }}
+          key: ${{ secrets.AWS_PRIVATE_KEY }}
+          script: |
+            docker login
+            docker pull ${{ secrets.DOCKER_USERNAME }}/sat_img_seg:latest
+            docker stop sat_img_seg
+            docker rm sat_img_seg
+            docker run -d --name sat_img_seg -p 5000:5000 ${{ secrets.DOCKER_USERNAME }}/sat_img_seg:latest
 
 
       
