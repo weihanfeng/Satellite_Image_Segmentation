@@ -26,7 +26,8 @@ def upload_image():
         # Hydra config
         with initialize(version_base=None, config_path="../conf"):
             cfg = compose(config_name="config")
-            
+        # set torch_home to the path where the models are stored
+        os.environ["TORCH_HOME"] = "models/cache"
         # Load the model
         model = UNetWithResnet50Encoder(
             last_n_layers_to_unfreeze=2,
