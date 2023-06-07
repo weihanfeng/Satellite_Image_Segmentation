@@ -1,7 +1,7 @@
 FROM python:3.9-slim-buster
 
 ARG USER=app
-ARG UID=1000
+ARG ID=1000
 ARG HOME_DIR="/home/$USER"
 ARG REQUIREMENTS_TXT="requirements_cpu.txt"
 
