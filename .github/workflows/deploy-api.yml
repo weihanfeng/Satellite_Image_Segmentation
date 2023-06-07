@@ -23,11 +23,11 @@ jobs:
           username: ${{ secrets.AWS_USERNAME }}
           key: ${{ secrets.AWS_PRIVATE_KEY }}
           script: |
-            docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
-            docker pull ${{ secrets.DOCKER_USERNAME }}/sat_img_seg:latest
-            docker stop sat_img_seg
-            docker rm sat_img_seg
-            docker run -d --name sat_img_seg -p 5000:5000 ${{ secrets.DOCKER_USERNAME }}/sat_img_seg:latest
+            sudo docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+            sudo docker pull ${{ secrets.DOCKER_USERNAME }}/sat_img_seg:latest
+            sudo docker stop sat_img_seg
+            sudo docker rm sat_img_seg
+            sudo docker run -d --name sat_img_seg -p 5000:5000 ${{ secrets.DOCKER_USERNAME }}/sat_img_seg:latest
 
 
       
