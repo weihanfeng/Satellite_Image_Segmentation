@@ -2,7 +2,7 @@ name: Test Conda Environment
 
 on:
   push:
-    branches: [ master ]
+    branches: [ development, master ]
   pull_request:
     branches: [ master ]
 
