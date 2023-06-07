@@ -13,8 +13,8 @@ RUN apt-get update && apt-get install ffmpeg libsm6 libxext6  -y
 USER $USER
 
 # Install any needed packages specified in requirements.txt
-COPY --chown=$ID:$ID REQUIREMENTS_TXT .
-RUN pip3 install -r REQUIREMENTS_TXT
+COPY --chown=$ID:$ID $REQUIREMENTS_TXT .
+RUN pip3 install -r $REQUIREMENTS_TXT
 
 # Copy the required files into the container at /app
 COPY --chown=$ID:$ID src/ ./src
