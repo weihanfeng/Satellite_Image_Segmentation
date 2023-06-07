@@ -2,7 +2,7 @@ name: Deploy API to AWS
 
 on:
   push:
-    branches: [ master ]
+    branches: [ development, master ]
   pull_request:
     branches: [ master ]
   
