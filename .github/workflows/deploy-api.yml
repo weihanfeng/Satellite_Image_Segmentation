@@ -16,7 +16,6 @@ jobs:
       - run: docker build -t sat_img_seg:latest -f docker/flask_app.dockerfile .
       - run: docker tag sat_img_seg ${{ secrets.DOCKER_USERNAME }}/sat_img_seg:latest
       - run: docker push ${{ secrets.DOCKER_USERNAME }}/sat_img_seg:latest
-      - run: echo "Docker Image published to Docker Hub"
       - name: Deploy to AWS
         uses: appleboy/ssh-action@master
         with:
