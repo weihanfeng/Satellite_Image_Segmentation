@@ -2,9 +2,13 @@ name: Deploy API to AWS
 
 on:
   push:
-    branches: [ development, master ]
+    branches: [ master ]
   pull_request:
     branches: [ master ]
+  workflow_run:
+    workflows: ["Test Conda Environment"]
+    types:
+      - completed
   
 jobs:
   build-and-deploy:
